@@ -27,8 +27,8 @@ function [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod( dataDir, outDir, s
 %
     
   
-    mergedPmodFile=[dataDir subject '/Decay/PMOD_Processed/' subject '_Sess1_all_dy.nii'];
-    acqTimesFile=[dataDir subject '/Decay/PMOD_Processed/' subject '_Sess1.acqtimes'];
+    mergedPmodFile=[dataDir subject '/Decay/PMOD_Processed/' subject '_Sess2_all_dy.nii'];
+    acqTimesFile=[dataDir subject '/Decay/PMOD_Processed/' subject '_Sess2.acqtimes'];
     if(exist(mergedPmodFile,'file')~=2)
         ME = MException([mergedPmodFile ' deos not exist. Use PMOD to create this file.']);
         throw(ME);

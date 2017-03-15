@@ -17,13 +17,13 @@ function preProcess(stepName)
     addpath(scriptdir);
 
     %  Base directory path for each subject processing
-    analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Feb-8/';
+    analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Scan-2/Feb-28/';
     if(exist(analysisDir,'dir')~=7)
       mkdir(analysisDir)
     end
     % Input arguments for Processing
     % Base directory path for subject dcm files
-    dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/';
+    dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_2/';
 
     % T1_2_mni files for each subject located under [mriDataDir]/subject/T1_2mni
     mriDataDir ='/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/';
@@ -38,27 +38,24 @@ function preProcess(stepName)
     decayConstant = 109.77;
 
     subjects = {
-        'DND005' %not good align - set 0
+        'DND005' 
         'DND007'
-        'DND014' %not good align - set 0,1,2
-        'DND016' %not good align - set 0
+        'DND014' 
+        'DND016' 
         'DND018'
-        'DND022' %not good align - set 0,1,2
+        'DND022' 
         'DND023'
-        'DND027' % different dir structure
+        'DND027' 
         'DND031'
-        'DND032' %not good align - set 0,1,2
-        'DND037' % different dir structure
-        'DND039'
-        'DND040' %not good align - set 0,1,2
-        'DND041' % different dir structure
-        'DND042' %not good align - set 0,1,2
-        'DND048' %not good align - set 0,1,2
-        'DND050' %not good align - set 0,1,2
-        'DND052' %not good align - set 0,1,2
-        'DND060'
-        'DND062' % different dir structure
-        'DND069' % different dir structure
+        'DND032' 
+        'DND037' 
+        'DND041'
+        'DND042' 
+        'DND048' 
+        'DND050' 
+        'DND052' 
+        'DND062' 
+        'DND069' 
         'DND072'
         };
     tic;

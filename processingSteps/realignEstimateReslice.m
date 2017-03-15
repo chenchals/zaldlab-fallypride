@@ -121,7 +121,7 @@ function [ initObj ] = initializeVars(niiBaseDir, subject)
         volsDY1,'UniformOutput',false);
     % Decay corrected files
     volsDY23=num2cell([28:34]);
-    listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'.nii,1'], ...
+    listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'_dc.nii,1'], ...
         volsDY23,'UniformOutput',false);
     % Merge file lists
     initObj.realignList = [listDY1,listDY23]';
