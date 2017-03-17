@@ -8,47 +8,42 @@ function process()
 %
 %
 % Gather all variables from the caller
-    petBet = evalin('caller','petBet');
-    t1Bet = evalin('caller','t1Bet');
-    analysisDir = evalin('caller','analysisDir');
-    dataDir = evalin('caller','dataDir');
-    pmodNiiFileExt = evalin('caller','pmodNiiFileExtension');    
-    pmodAcqtimeFileExt = evalin('caller','pmodAcqtimeFileExtension');
+    params.analysisDir = evalin('caller','analysisDir');
+    params.realignBaseDir = evalin('caller','realignDirBase');
+    params.dataDir = evalin('caller','dataDir');
+    params.pmodNiiFileExt = evalin('caller','pmodNiiFileExtension');    
+    params.pmodAcqtimeFileExt = evalin('caller','pmodAcqtimeFileExtension');
+    params.decayConstant = evalin('caller','decayConstant');
     % For bet and co-register
-    meanVol = evalin('caller','meanVol');
-    meanVolThr = [meanVol '_thr'];
-    coWipT1Sense = evalin('caller','coWipT1Sense');
-    cerebellumT1gz = evalin('caller','cerebellumT1gz');
-    putamenT1gz = evalin('caller','putamenT1gz');
-    
-    mriDataDir = evalin('caller','mriDataDir');
-    realignDirBase = evalin('caller','realignDirBase');
-    decayConstant = evalin('caller','decayConstant');
+    params.mriDataDir = evalin('caller','mriDataDir');
+    params.petBet = evalin('caller','petBet');
+    params.t1Bet = evalin('caller','t1Bet');
+    params.meanVol = evalin('caller','meanVol');
+    params.meanVolThr = [params.meanVol '_thr'];
+    params.coWipT1Sense = evalin('caller','coWipT1Sense');
+    params.cerebellumT1gz = evalin('caller','cerebellumT1gz');
+    params.putamenT1gz = evalin('caller','putamenT1gz');
+    params.toBacquerel=0;
+    params.callerName=getCallerName();    
     subjects = evalin('caller','subjects');
-    
-    
 
-    
-    
-    
-    % Process current call
-    callerName=getCallerName();
+     % Process current call
     scriptdir = pwd;
     addpath(scriptdir);
-    if ~exist(analysisDir,'dir')
-      mkdir(analysisDir)
+    if ~exist(params.analysisDir,'dir')
+      mkdir(params.analysisDir)
     end
+    startDiary([params.analysisDir filesep params.callerName '_diary.txt']);
     
     % Use multicore if available
     tic;
-    for ii=1:length(subjects)
+    parfor ii=1:length(subjects)
         subject = subjects{ii};
         try
-%             [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod(dataDir, analysisDir, subject, pmodNiiFileExt, pmodAcqtimeFileExt);
-%             toBacquerel=0;
-%             decayCorrectNiiVolumes(niiList, acqTimes, decayConstant,toBacquerel);
-%             realignEstimateReslice(analysisDir, realignDirBase,  subject);
-            coregisterMeanPetWithT1(analysisDir, realignDirBase, mriDataDir, subject, t1Bet, petBet);
+            [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod(subject,params);
+            decayCorrectNiiVolumes(niiList, acqTimes, params.decayConstant,params.toBacquerel);
+            realignEstimateReslice(subject, params);
+            coregisterMeanPetWithT1(subject, params);
             log(ii).message = [subject,' :: ','Preprocess successful'];
         catch err % on error collect log
             log(ii).message = [subject,' :: ***Preprocess FAILED ***', err.identifier,'::',err.message];
@@ -69,8 +64,16 @@ function process()
     end
     fprintf('Time to preProcess %d Subjects: %.3g seconds\n', ...
         length(subjects), t);
-    fname=[analysisDir callerName 'log.mat'];
+    fname=[params.analysisDir filesep params.callerName 'log.mat'];
     save(fname, 'log');
+    diary('off');
+end
+function startDiary(fname)
+    if strmatch(get(0,'Diary'),'on')
+        diary('off');
+    end
+    diary(fname);
+    diary('on');
 end
 function [str] = getCallerName()
   st=dbstack();
