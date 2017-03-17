@@ -1,29 +1,34 @@
-function coregisterMeanPetWithT1( analyisDir, realignBaseDir, mriDataDir, subject, t1Bet, petBet )
-%COREGISTERMEANPETWITHT1 Summary of this function goes here
-%   Detailed explanation goes here
+function coregisterMeanPetWithT1( subject, params )
+%COREGISTERMEANPETWITHT1 Coregister the mean PET scan with subject T1 Scan
+%
+%   
     batchFunction='coregisterMeanPetWithT1';
-    
-    %% Filenames
+    fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
+ 
+    %% Filenames and vars
     % For thresholding
-    meanVol = evalin('caller','meanVol');
-    meanVolThr = evalin('caller','meanVolThr');
-    coWipT1Sense = evalin('caller','coWipT1Sense');
-    cerebellumT1gz = evalin('caller','cerebellumT1gz');
-    putamenT1gz = evalin('caller','putamenT1gz');
-
-    t1BetFvals=t1Bet;
+    meanVol = params.meanVol;
+    meanVolThr = params.meanVolThr;
+    coWipT1Sense = params.coWipT1Sense;
+    cerebellumT1gz = params.cerebellumT1gz;
+    putamenT1gz = params.putamenT1gz;
+    analysisDir = params.analysisDir;
+    realignBaseDir = params.realignBaseDir;
+    mriDataDir = params.mriDataDir;
+    t1BetFvals = params.t1Bet;
+    petBetFvals = params.petBet;    
+    
     coWipT1SenseBet{3}=[];
     fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
-
     % keep track of the where this function is
     currentDir = pwd;
     
     %% Call fsl functions for each realigned set
      % Set fsl output to nii
     setenv('FSLOUTPUTTYPE','NIFTI');
-    motionCorrDirs = getDirListForMotionCorrectedNii(analyisDir, subject, realignBaseDir);
+    motionCorrDirs = getDirListForMotionCorrectedNii(analysisDir, subject, realignBaseDir);
     t1Dir = [mriDataDir, subject, filesep, 'T1_2_MNI', filesep];
-    petBetFvals=petBet;
+
     % for each analysis dir of motion corrected files
     for ii=1:length(motionCorrDirs)
         petDir = [char(motionCorrDirs{ii}),filesep];
