@@ -38,12 +38,6 @@ function [ outFiles, decayFactorDy2, decayFactorDy3 ] = decayCorrectNiiVolumes(n
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
  
-  if(nargin==3)
-      toBacquerel=1;
-  else
-      toBacquerel=0;
-  end
-
   batchFunction='decayCorrectNiiVolumes';
   % Set fsloutputtype to NIFTI
   setenv('FSLOUTPUTTYPE','NIFTI');
