@@ -8,7 +8,7 @@
 %
 %
     %  Base directory path for each subject processing
-    analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Mar-17Final/Scan-2/';
+    analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Mar-20-Final/Scan-2/';
     % Input arguments for Processing
     % Base directory path for subject dcm and PMOD_Processed files
     dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_2/';

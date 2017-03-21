@@ -7,7 +7,7 @@
 %   [analysisDir]/[subject]/[realignDirBase]2 vol0000.nii and vol0002.nii dropped
 %
 %  Base directory path for each subject processing ** ends in a / ***
-analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Mar-17Final/Scan-1/';
+analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Mar-20-Final/Scan-1/';
 % Input arguments for Processing
 % Base directory path for subject dcm and PMOD_Processed files
 dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/';
