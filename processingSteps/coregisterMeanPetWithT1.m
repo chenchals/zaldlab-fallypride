@@ -1,35 +1,34 @@
-function coregisterMeanPetWithT1( analyisDir, realignBaseDir, mriDataDir, subject, t1Bet, petBet )
-%COREGISTERMEANPETWITHT1 Summary of this function goes here
-%   Detailed explanation goes here
-    global meanVolThr;
-    global cerebellumT1gz;
-    global putamenT1gz;
-    
+function coregisterMeanPetWithT1( subject, params )
+%COREGISTERMEANPETWITHT1 Coregister the mean PET scan with subject T1 Scan
+%
+%   
     batchFunction='coregisterMeanPetWithT1';
-    % Set fsl output to nii
-    setenv('FSLOUTPUTTYPE','NIFTI');
     fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
-
+ 
+    %% Filenames and vars
+    % For thresholding
+    meanVol = params.meanVol;
+    meanVolThr = params.meanVolThr;
+    coWipT1Sense = params.coWipT1Sense;
+    cerebellumT1gz = params.cerebellumT1gz;
+    putamenT1gz = params.putamenT1gz;
+    analysisDir = params.analysisDir;
+    realignBaseDir = params.realignBaseDir;
+    mriDataDir = params.mriDataDir;
+    t1BetFvals = params.t1Bet;
+    petBetFvals = params.petBet;    
+    
+    coWipT1SenseBet{3}=[];
+    fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
     % keep track of the where this function is
     currentDir = pwd;
-    %% Filenames
-    % For thresholding
-    meanVol = 'meanvol0019';
-    %meanVolThr = 'meanvol0019_thr';
-    % For coregister
-    coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001';
-    t1BetFvals=t1Bet;
-    coWipT1SenseBet{3}=[];
-    % Cerebellum T1
-    cerebellumT1gz = 'cerebellum_T1space.nii.gz';
-    % Putamen T1
-    putamenT1gz = 'putamen_T1space.nii.gz';
     
     %% Call fsl functions for each realigned set
-    
-    motionCorrDirs = getDirListForMotionCorrectedNii(analyisDir, subject, realignBaseDir);
+     % Set fsl output to nii
+    setenv('FSLOUTPUTTYPE','NIFTI');
+    motionCorrDirs = getDirListForMotionCorrectedNii(analysisDir, subject, realignBaseDir);
     t1Dir = [mriDataDir, subject, filesep, 'T1_2_MNI', filesep];
-    petBetFvals=petBet;
+
     % for each analysis dir of motion corrected files
     for ii=1:length(motionCorrDirs)
         petDir = [char(motionCorrDirs{ii}),filesep];
@@ -37,7 +36,7 @@ function coregisterMeanPetWithT1( analyisDir, realignBaseDir, mriDataDir, subjec
 
         % All relevant files in this dir, so do analysis here
         cd(petDir); % end of this fx change back to the currentDir location
-        % Copy coWIPTI...nii, cerebellum_T1..nii.gz, and
+        % Copy coWIPT1...nii, cerebellum_T1..nii.gz, and
         % putamen_T1....nii.gz to petDir
 
         callSystem(['cp ', [t1Dir,cerebellumT1gz], ' ', [petDir,cerebellumT1gz]]);
@@ -56,16 +55,15 @@ function coregisterMeanPetWithT1( analyisDir, realignBaseDir, mriDataDir, subjec
         else
             callSystem(['cp ', [char(motionCorrDirs{1}),filesep,coWipT1Sense,'*'], ' ', petDir]);
         end        
-        % For thresholding
-        meanVolThr = 'meanvol0019_thr';
+
         % Threshold the mean volume
         fprintf('\n\t%s: Computing thresholded mean vol for subject: %s\n',batchFunction,subject);
         fslThresholdVolume(meanVol, meanVolThr, 1);
         % No Bet process
-        processCoregistration(petDir, petBetFvals(1), t1BetFvals(1), char(coWipT1SenseBet{1}));
+        processCoregistration(petDir, petBetFvals(1), t1BetFvals(1), char(coWipT1SenseBet{1}), meanVolThr, cerebellumT1gz, putamenT1gz);
         for petBet=2:length(petBetFvals)
             for t1Bet=2:length(t1BetFvals) % t1s already bet-ed
-                processCoregistration(petDir, petBetFvals(petBet), t1BetFvals(t1Bet), char(coWipT1SenseBet{t1Bet}));
+                processCoregistration(petDir, petBetFvals(petBet), t1BetFvals(t1Bet), char(coWipT1SenseBet{t1Bet}), meanVolThr, cerebellumT1gz, putamenT1gz);
             end
         end
         
@@ -74,10 +72,7 @@ function coregisterMeanPetWithT1( analyisDir, realignBaseDir, mriDataDir, subjec
 end
 
 %% Compute coregister steps for each BET
-function processCoregistration(analysisDir, petBetFval, t1BetFval, coWipT1SenseFile)
-    global meanVolThr;
-    global cerebellumT1gz;
-    global putamenT1gz;
+function processCoregistration(analysisDir, petBetFval, t1BetFval, coWipT1SenseFile, meanVolThr, cerebellumT1gz, putamenT1gz)
     t1PetBetSuffix = '';
     petBetSuffix = '';
     % change filenames for bet

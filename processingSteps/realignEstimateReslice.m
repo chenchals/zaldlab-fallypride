@@ -1,4 +1,5 @@
-function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, subject)
+function [ realignSets ] = realignEstimateReslice(subject, params)
+%function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, subject)
 %REALIGNESTIMATERESLICE Motion correction for NIfTI images
 %Note correction is specific to studies of Fallypride. The function
 %Excepts the following Directory structure and filename pattern:
@@ -50,10 +51,14 @@ function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, su
 %
     batchFunction='realignEstimateReslice';
     fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
+    
+    %Parameters
+    analysisDir = params.analysisDir;
+    realignBaseDir = params.realignBaseDir;
 
     % Process spm batch for job
     % Initialize subject specific variables
-    initObj=initializeVars(niiBaseDir, subject);
+    initObj=initializeVars(analysisDir, subject);
     realignList=initObj.realignList;
     realignSets{3}=[]; % initialize cell array
     % Run current job function, passing along subject-specific inputs
@@ -121,7 +126,7 @@ function [ initObj ] = initializeVars(niiBaseDir, subject)
         volsDY1,'UniformOutput',false);
     % Decay corrected files
     volsDY23=num2cell([28:34]);
-    listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'.nii,1'], ...
+    listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'_dc.nii,1'], ...
         volsDY23,'UniformOutput',false);
     % Merge file lists
     initObj.realignList = [listDY1,listDY23]';
