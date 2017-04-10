@@ -1,4 +1,4 @@
-function [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod( subject, params )
+function [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod( params )
 %function [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod( dataDir, outDir, subject,  pmodNiiFileExt, pmodAcqtimeFileExt )
 %EXTRACTNIIFROMPMOD4D Extract nii images from PMOD merged dcm files.
 %Filename pattern : SUBJECT/Decay/PMOD_Processed/SUBJECT_Sess1_all_dy.nii
@@ -27,23 +27,20 @@ function [niiList, acqTimes] = extractNiiAndAcqTimesFromPmod( subject, params )
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
    batchFunction='extractNiiAndAcqTimesFromPmod';
-   fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
-
+   subject = params.subject;
+   fprintf('Processing for subject: %s\t%s',subject,batchFunction);
    %Parameters
-   dataDir = params.dataDir;
-   outDir = params.analysisDir;
-   pmodNiiFileExt = params.pmodNiiFileExt;
-   pmodAcqtimeFileExt = params.pmodAcqtimeFileExt;
-   
-    mergedPmodFile=[dataDir subject '/Decay/PMOD_Processed/' subject pmodNiiFileExt];
-    acqTimesFile=[dataDir subject '/Decay/PMOD_Processed/' subject pmodAcqtimeFileExt];
+    outputDir = [params.analysisDir subject filesep];
+    mergedPmodFile = params.pmodNiiFile;
+    acqTimesFile = params.acqTimesFile;
+    
     if ~exist(mergedPmodFile,'file')
         throw(MException('extractNiiAndAcqTimesFromPmod:mergedNiiFileNotFound','File %s does not exist. Use PMOD to create this file.', mergedPmodFile));
     end
     if ~exist(acqTimesFile,'file')
         throw(MException('extractNiiAndAcqTimesFromPmod:acqtimesFileNotFound','File %s does not exist. Use PMOD to create this file.', acqTimesFile));
     end
-    outputDir = [outDir subject filesep];
+
     niiList = copyAndSplit4Dnii(mergedPmodFile, outputDir);
     fileCopy(acqTimesFile,outputDir);
     acqFileContents=importdata(acqTimesFile,'\t',2);
