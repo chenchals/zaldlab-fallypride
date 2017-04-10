@@ -8,13 +8,13 @@ function [ defaults ]=defaults_fallypride()
     defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
     % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
     defaults.pmodNiiFileExt = '_Sess1_all_dy.nii';    
-    defaults.numberOfVols = 35;    
     % PMOD acq times file [defaults.subject]_Sess1.acqtimes
     defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
+    defaults.numberOfVols = 35;    
     % Counts to Bq correction flag
-    defaults.countsToBacquerel = true;
+    defaults.countsToBacquerel = false;
     % Decay correction for PET scans done at Gaps DY2, DY3..
-    defaults.doDecayCorrection=true;
+    defaults.doDecayCorrection=false;
     % Decay constant in minutes
     defaults.decayConstant = 109.77;
     % Include only those for which decay correction are needed
@@ -24,9 +24,6 @@ function [ defaults ]=defaults_fallypride()
         {'vol0028' 'vol0029' 'vol0030' 'vol0031'}  % DY2
         {'vol0032' 'vol0033' 'vol0034'}            % DY3
         };
-    % Index of row in AcqTimes file corresponding to  
-    % start volume of decay correction epochs 
-    % defaults.decayCorrectionAcqtimeRowIndices = [29,33];
 
     % Motion correction reference Volume
     defaults.motionCorrectionRefVol = 'vol0019';

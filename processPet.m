@@ -46,7 +46,7 @@ function processPet()
   
   % Use multicore if available
   tic;
-  parfor ii=1:length(subjectParams)
+  for ii=1:length(subjectParams)
       params = subjectParams{ii};
       subject = params.subject;
       params.subjectAnalysisDir=[params.analysisDir subject filesep];
@@ -159,6 +159,10 @@ function [ paramOpts, subjectErr ] = validate(paramOpts)
   paramOpts.acqTimesFile=char(fList{2});
   paramOpts.t1File=char(fList{3});
   paramOpts.roiFiles=fListRois;
+  %Ensure validity of decay correction 
+  if ~paramOpts.doDecayCorrection
+      paramOpts.decayCorrectionVolLists={};
+  end
   
 end
 

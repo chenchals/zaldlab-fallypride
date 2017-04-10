@@ -4,20 +4,17 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
 %   vol0029 and DY3 at vol0032
 %
 %   Inputs:
-%   params.analysisDir : Folder containing subject folder structure described above
-%   params.subject : Subject folder name 
-%   params.pmodNiiFile : Full filepath of 4D nii file created using PMOD
-%
 %   params.subject : Subject Id
 %   params.subjectAnalysisDir : Subject directory containing vol*.nii files 
+%   params.logger : Logger for logging progress 
+%   params.niiFileList : Full filepath of nii files fro this function
 %   params.numberOfVols : Total number of PET volumes;    
-%   params.pmodAcqtimeFileExt : PMOD acquisition times file.  Must contain
-%          params.numberOfVols of rows for start and end time of slices in each volume
 %   params.countsToBacquerel : (true|false) Convert PET Counts to Bq correction flag;
 %   params.doDecayCorrection : (true|false) Decay correction for PET scans done at Gaps DY2, DY3..;
 %   params.decayConstant : Decay constant in minutes (109.77 Fallypride) 
-%   params.decayCorrectionFileSuffix : _dc -  Include only tdecay correction is needed
-%    
+%   params.decayCorrectionFileSuffix : _dc -  Include only tdecay correction is needed   
+%   params.acqTimes : Acquisition times. Array [params.numberOfVols, 2]
+%           The start and end time of slices for each volume
 %   params.decayCorrectionVolLists : List of nii volumes to apply decay
 %          correction Zero-based. Example for Fallypride
 %          {
@@ -34,20 +31,27 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
 %
  
   batchFunction='decayCorrectNiiVolumes';
-  subject = params.subject;
-  logger=params.logger;
-  logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
-
   % Set fsloutputtype to NIFTI
   setenv('FSLOUTPUTTYPE','NIFTI');
-  decayCorrectedFileList = params.niiFileList;
-  acqTimes = params.acqTimes;
+  % Inputs
+  subject = params.subject;
+  subjectAnalysisDir = params.subjectAnalysisDir;
+  logger=params.logger;
+  niiFileList = params.niiFileList;
   numberOfVols = params.numberOfVols;
   toBacquerel = params.countsToBacquerel;
   doDecayCorrection = params.doDecayCorrection;
+  decayConstant = params.decayConstant;
+  decayCorrectionFileSuffix = params.decayCorrectionFileSuffix;
+  acqTimes = params.acqTimes;
+  decayCorrectionVolLists = params.decayCorrectionVolLists;
+  % Outputs
+  decayCorrectedFileList = niiFileList;
+  decayCorrectionFactors = [];
   
+  logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
   % Check list length and acqTimes size
-  if(numel(params.niiFileList)~=numberOfVols || numel(acqTimes)~=(numberOfVols*2))
+  if(numel(niiFileList)~=numberOfVols || numel(acqTimes)~=(numberOfVols*2))
       msg=sprintf('Number of nii files %d in niiFileList not equal to %d Or size of acqTimes is not [%d x 2]',...
           numel(niiFileList), numberOfVols, numberOfVols);
       throw(MException('decayCorrectNiiVolumes:invalidNumberOfFiles',msg));
@@ -55,20 +59,24 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
   
   if(toBacquerel)
       logger.info(sprintf('FSL conversion from counts to mBq for subject %s',subject));
-      multiplyNii(decayCorrectedFileList,1/1000.0,'')
+      multiplyNii(decayCorrectedFileList,1/1000.0,'');
+  else
+      logger.info(sprintf('FSL **NO conversion from counts to mBq** for subject %s',subject));
   end
-  decayCorrectionFactors(numel(params.decayCorrectionVolLists)) = 0;
-  if(doDecayCorrection)
+  
+  if(doDecayCorrection && numel([decayCorrectionVolLists{:}]))
       logger.info(sprintf('FSL Decay Correction for subject %s',subject));
-      for i=1:numel(params.decayCorrectionVolLists)
-          dcList = params.decayCorrectionVolLists(i);
-          startEndAcqTimeIndex = regexp(dcList{:}{1},'(\d{1,})$','tokens');
+      for i=1:numel(decayCorrectionVolLists)
+          dcList = decayCorrectionVolLists{i};
+          startEndAcqTimeIndex = regexp(dcList{1},'(\d{1,})$','tokens');
           startEndAcqTimeIndex = str2double(char(startEndAcqTimeIndex{1})) + 1;%29 for DY2
-          dcList = strcat(params.subjectAnalysisDir, dcList{:},'.nii');
-          [dcFiles, decayCorrectionFactors(i)] = decayCorrectFiles(dcList,params.decayConstant,acqTimes(startEndAcqTimeIndex,:),params.decayCorrectionFileSuffix);
+          dcList = strcat(subjectAnalysisDir, dcList,'.nii');
+          [dcFiles, decayCorrectionFactors(i)] = decayCorrectFiles(dcList,decayConstant,acqTimes(startEndAcqTimeIndex,:),decayCorrectionFileSuffix);
           decayCorrectedFileList = regexprep(decayCorrectedFileList,dcList,dcFiles);
           clearvars dcList startEndAcqTimeIndex dcFiles;
       end
+  else
+      logger.info(sprintf('FSL **NO Decay Correction** for subject %s',subject));
   end
     
 end
