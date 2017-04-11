@@ -46,7 +46,7 @@ function processPet()
   
   % Use multicore if available
   tic;
-  for ii=1:length(subjectParams)
+  parfor ii=1:length(subjectParams)
       params = subjectParams{ii};
       subject = params.subject;
       params.subjectAnalysisDir=[params.analysisDir subject filesep];
@@ -68,13 +68,14 @@ function processPet()
           continue;
       end
       try
-          [niiFileList] = extractNiiFromPmod(params);
-          params = updateAndSave(params,'niiFileList',  niiFileList);
-          [acqTimes] = extractAcqTimesFromPmod(params);
-          params = updateAndSave(params,'acqTimes',  acqTimes);
+          params.niiFileList = extractNiiFromPmod(params);
+          saveParams(params);
+          params.acqTimes = extractAcqTimesFromPmod(params);
+          saveParams(params);
           [params.decayCorrectedFileList, params.deacyCorrectionFactor] = decayCorrectNiiVolumes(params);
           params = saveParams(params);
-          %realignEstimateReslice(subject, params);
+          params.motionCirrectionFileLists = realignEstimateReslice(params);
+          params = saveParams(params);
           %coregisterMeanPetWithT1(subject, params);
           processingSuccessful(params);
           cd(scriptdir);

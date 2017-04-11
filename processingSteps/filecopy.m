@@ -1,5 +1,5 @@
 function [ fname ] = filecopy(fullFilePath, oDir)
-%FILECOPY : 
+%FILECOPY :
     if ~exist(oDir,'dir')
         mkdir(oDir);
     end
@@ -9,4 +9,3 @@ function [ fname ] = filecopy(fullFilePath, oDir)
     disp(cmd);
     system(cmd, '-echo');
 end
-

@@ -15,7 +15,7 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
 %   params.decayCorrectionFileSuffix : _dc -  Include only tdecay correction is needed   
 %   params.acqTimes : Acquisition times. Array [params.numberOfVols, 2]
 %           The start and end time of slices for each volume
-%   params.decayCorrectionVolLists : List of nii volumes to apply decay
+%   params.decayCorrectionVolSets : List of nii volumes to apply decay
 %          correction Zero-based. Example for Fallypride
 %          {
 %           {'vol0028' 'vol0029' 'vol0030' 'vol0031'}  % DY2
@@ -44,7 +44,7 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
   decayConstant = params.decayConstant;
   decayCorrectionFileSuffix = params.decayCorrectionFileSuffix;
   acqTimes = params.acqTimes;
-  decayCorrectionVolLists = params.decayCorrectionVolLists;
+  decayCorrectionVolSets = params.decayCorrectionVolSets;
   % Outputs
   decayCorrectedFileList = niiFileList;
   decayCorrectionFactors = [];
@@ -64,10 +64,10 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
       logger.info(sprintf('FSL **NO conversion from counts to mBq** for subject %s',subject));
   end
   
-  if(doDecayCorrection && numel([decayCorrectionVolLists{:}]))
+  if(doDecayCorrection && numel([decayCorrectionVolSets{:}]))
       logger.info(sprintf('FSL Decay Correction for subject %s',subject));
-      for i=1:numel(decayCorrectionVolLists)
-          dcList = decayCorrectionVolLists{i};
+      for i=1:numel(decayCorrectionVolSets)
+          dcList = decayCorrectionVolSets{i};
           startEndAcqTimeIndex = regexp(dcList{1},'(\d{1,})$','tokens');
           startEndAcqTimeIndex = str2double(char(startEndAcqTimeIndex{1})) + 1;%29 for DY2
           dcList = strcat(subjectAnalysisDir, dcList,'.nii');
