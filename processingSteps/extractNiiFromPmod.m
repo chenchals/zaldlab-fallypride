@@ -33,8 +33,7 @@ function [niiFileList] = extractNiiFromPmod( params )
     fname = filecopy(mergedPmodFile, subjectAnalysisDir);
     cd(subjectAnalysisDir);
     setenv('FSLOUTPUTTYPE','NIFTI');
-    cmd =  ['fslsplit ' fname ];
-    %disp(cmd);
+    cmd =  ['fslsplit ', fname];
     logger.info(cmd);
     system(cmd,'-echo');
     d=dir(subjectAnalysisDir);

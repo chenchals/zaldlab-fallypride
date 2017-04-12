@@ -1,4 +1,4 @@
-function [ motionCorrectionFileLists ] = realignEstimateReslice(params)
+function [ motionCorrectionFileLists, meanMotionCorrectedVol ] = realignEstimateReslice(params)
 %function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, subject)
 %REALIGNESTIMATERESLICE Motion correction for NIfTI images
 %Note correction is specific to studies of Fallypride. The function
@@ -60,7 +60,8 @@ function [ motionCorrectionFileLists ] = realignEstimateReslice(params)
   decayCorrectedFileList = params.decayCorrectedFileList;
 
   % Outputs
-  motionCorrectionFileLists{numel(motionCorrectionVolSetsToExclude)+1} = [];
+  motionCorrectionFileLists{numel(motionCorrectionVolSetsToExclude)}=0;
+  meanMotionCorrectedVol{numel(motionCorrectionVolSetsToExclude)}=0;
   
   logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
   % Process spm batch for job
@@ -93,17 +94,18 @@ function [ motionCorrectionFileLists ] = realignEstimateReslice(params)
       save(outName, 'batchJob');
       save([outName,'_jobOutput'], 'jobOutput');
       % Copy / rename files and move to appropriate sub-directory
-      realignedDir=[subjectAnalysisDir, realignBaseDir, num2str(ii-1)];
+      realignedDir=[subjectAnalysisDir, realignBaseDir, num2str(ii-1), filesep];
       logger.info(sprintf('Motion correction: Copying SPM batch job output to anslysisDir %s', realignedDir));
       mkdir(realignedDir);
-      copyfile([subjectAnalysisDir,'r*.*'], [realignedDir, filesep,'.']);
+      copyfile([subjectAnalysisDir,'r*.*'], [realignedDir,'.']);
       delete([subjectAnalysisDir,'r*.*']);
-      copyfile([subjectAnalysisDir,'mean*.*'], [realignedDir, filesep,'.']);
+      copyfile([subjectAnalysisDir,'mean*.*'], [realignedDir, '.']);
       delete([subjectAnalysisDir,'mean*.*']);
-      copyfile([subjectAnalysisDir,'*_set_*.*'], [realignedDir, filesep,'.']);
+      copyfile([subjectAnalysisDir,'*_set_*.*'], [realignedDir, '.']);
       delete([subjectAnalysisDir,'*_set_*.*']);
       % Output
       motionCorrectionFileLists{ii} = realignList;
+      meanMotionCorrectedVol{ii} = strcat(realignedDir,'mean',motionCorrectionRefVol,'.nii');
             
       % Clear Job vars
       clear batchJob jobOutput
@@ -111,32 +113,6 @@ function [ motionCorrectionFileLists ] = realignEstimateReslice(params)
   end
 
 end
-
-% % Initialize variables
-% function [ initObj ] = initializeVars(niiBaseDir, subject)
-%     % SPM info
-%     initObj.spmDir = fileparts(which('spm'));
-% 
-%     % Input
-%     initObj.subject = subject;
-%     initObj.outDir = niiBaseDir;
-%     % Directory containing the nii files
-%     initObj.niiDir = strcat(niiBaseDir,initObj.subject);
-% 
-%     % Order of nii files for realign
-%     refVolume=19;
-%     volsDY1=num2cell([refVolume,0:refVolume-1,refVolume+1:27]);
-%     % Non-decay corrected files
-%     listDY1=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'.nii,1'], ...
-%         volsDY1,'UniformOutput',false);
-%     % Decay corrected files
-%     volsDY23=num2cell([28:34]);
-%     listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'_dc.nii,1'], ...
-%         volsDY23,'UniformOutput',false);
-%     % Merge file lists
-%     initObj.realignList = [listDY1,listDY23]';
-%     
-% end 
 
 % Create matlabbatch job
 function [ matlabbatch ] = createJob(realignList)
@@ -153,6 +129,5 @@ function [ matlabbatch ] = createJob(realignList)
     matlabbatch.spm.spatial.realign.estwrite.roptions.wrap = [0 0 0];
     matlabbatch.spm.spatial.realign.estwrite.roptions.mask = 1;
     matlabbatch.spm.spatial.realign.estwrite.roptions.prefix = 'r';
-  
 end
 

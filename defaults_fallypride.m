@@ -2,7 +2,7 @@ function [ defaults ]=defaults_fallypride()
     defaults.subject = '';
     defaults.dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/';
     defaults.mriDataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/';
-    defaults.analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Apr-11-1/Scan-1/';
+    defaults.analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Apr-11-4/Scan-1/';
     defaults.realignBaseDir = 'analysis-set';
     % Subject's PMD analysis dir 
     defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
@@ -11,8 +11,10 @@ function [ defaults ]=defaults_fallypride()
     % PMOD acq times file [defaults.subject]_Sess1.acqtimes
     defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
     defaults.numberOfVols = 35;    
-    % Counts to Bq correction flag
-    defaults.countsToBacquerel = true;
+    % Counts to Bq correction flag set only of the PET nii are counts
+    % Since we are using PMOD 4D nii file, the counts are already converted
+    % to mBq by PMOD
+    defaults.countsToBacquerel = false;
     % Decay correction for PET scans done at Gaps DY2, DY3..
     defaults.doDecayCorrection=true;
     % Decay constant in minutes
@@ -32,17 +34,20 @@ function [ defaults ]=defaults_fallypride()
         {'vol0000' 'vol0001'} % Analyses outputs in [defaults.realignBaseDir]2
         };
     % Co-register bet for mean PET vol thresholded
-    %    mean[defaults.motionCorrectionRefVol]_thr is used
-    defaults.petBet = [0, 0.3,0.4,0.5,0.6];
-    % Co-register bet for reference T1 vol
-    %  [defaults.coWipT1Sense] below
-    defaults.t1Bet = [0, 0.4, 0.5];
-    %defaults.meanVolThr = 'meanvol0019_thr';
     defaults.mniBaseDir='T1_2_MNI';
     defaults.coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001.nii';
-    % Brain ROIs in T1 Space
+    %  Subject BET -f values for T1 scan
+    defaults.t1Bet = [0, 0.4, 0.5];
+    % Subject Brain ROIs in T1 Space
     defaults.brainT1Rois = {
         'cerebellum_T1space.nii.gz'
         'putamen_T1space.nii.gz'
         };
+    
+    %Subject mean thresholded motion corrected volume to use for
+    %Co-register with Subject T1
+    % mean[defaults.motionCorrectionRefVol]_thr is used example : 'meanvol0019_thr'
+    %  Subject BET -f values for PET scans
+    defaults.petBet = [0, 0.3,0.4,0.5,0.6];
+
 end

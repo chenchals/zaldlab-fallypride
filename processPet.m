@@ -74,9 +74,9 @@ function processPet()
           saveParams(params);
           [params.decayCorrectedFileList, params.deacyCorrectionFactor] = decayCorrectNiiVolumes(params);
           params = saveParams(params);
-          params.motionCirrectionFileLists = realignEstimateReslice(params);
+          [params.motionCorrectionFileLists, params.meanMotionCorrectedVols] = realignEstimateReslice(params);
           params = saveParams(params);
-          %coregisterMeanPetWithT1(subject, params);
+          coregisterMeanPetWithT1(params);
           processingSuccessful(params);
           cd(scriptdir);
       catch err % on error collect log
@@ -137,29 +137,30 @@ end
 
 %%
 function [ paramOpts, subjectErr ] = validate(paramOpts)
-  subj=paramOpts.subject;
-  subjDir=[paramOpts.dataDir subj filesep paramOpts.pmodAnalysisDir filesep];  
-  mniDir=[paramOpts.mriDataDir subj filesep paramOpts.mniBaseDir filesep];
-  fList={ 
-        strcat(subjDir, subj, paramOpts.pmodNiiFileExt)
-        strcat(subjDir, subj, paramOpts.pmodAcqtimeFileExt)
-        strcat(mniDir, paramOpts.coWipT1Sense)
-      };
-  fListRois=strcat(mniDir,paramOpts.brainT1Rois);
-  fList=vertcat({fList{:} fListRois{:}})';
+  subject=paramOpts.subject;
+  paramOpts.subjectDataDir=[paramOpts.dataDir subject filesep paramOpts.pmodAnalysisDir filesep];  
+  paramOpts.subjectMniDir=[paramOpts.mriDataDir subject filesep paramOpts.mniBaseDir filesep];
+  
+  % Subject PET / T1 / ROI files
+  paramOpts.pmodNiiFile = strcat(paramOpts.subjectDataDir, subject, paramOpts.pmodNiiFileExt);
+  paramOpts.acqTimesFile = strcat(paramOpts.subjectDataDir, subject, paramOpts.pmodAcqtimeFileExt);
+  paramOpts.t1File = strcat(paramOpts.subjectMniDir, paramOpts.coWipT1Sense);
+  paramOpts.roiFiles = strcat(paramOpts.subjectMniDir,paramOpts.brainT1Rois);
+  
+  fList = [
+      paramOpts.pmodNiiFile
+      paramOpts.acqTimesFile
+      paramOpts.t1File
+      paramOpts.roiFiles
+      ];
 
-  subjectErr.subject=subj;
+  subjectErr.subject=subject;
   subjectErr.errors={};
   for ii=1:numel(fList)
     if ~exist(fList{ii},'file')
-      subjectErr.errors{end+1,1}=sprintf('**%s*** File does not exist %s', subj, fList{ii});
+      subjectErr.errors{end+1,1}=sprintf('**%s*** File does not exist %s', subject, fList{ii});
     end
   end
-  %absolute file paths
-  paramOpts.pmodNiiFile=char(fList{1});
-  paramOpts.acqTimesFile=char(fList{2});
-  paramOpts.t1File=char(fList{3});
-  paramOpts.roiFiles=fListRois;
   %Ensure validity of decay correction 
   if ~paramOpts.doDecayCorrection
       paramOpts.decayCorrectionVolLists={};
