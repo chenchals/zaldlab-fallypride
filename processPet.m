@@ -25,6 +25,8 @@ function processPet()
 %
   subjects=evalin('caller','subjects');
   params=evalin('caller','default_params()');
+  defaults=evalin('caller','defaults');
+  params=parseArgs(params,defaults);
   subjectParams={numel(subjects)};
   subjectErrors={numel(subjects)};
   for subInd=1:numel(subjects)

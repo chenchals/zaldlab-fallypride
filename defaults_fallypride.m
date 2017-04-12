@@ -11,6 +11,9 @@ function [ defaults ]=defaults_fallypride()
     % PMOD acq times file [defaults.subject]_Sess1.acqtimes
     defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
     defaults.numberOfVols = 35;    
+    
+    %% DECAY CORRECTION PARAMETERS BLOCK
+    
     % Counts to Bq correction flag set only of the PET nii are counts
     % Since we are using PMOD 4D nii file, the counts are already converted
     % to mBq by PMOD
@@ -26,6 +29,9 @@ function [ defaults ]=defaults_fallypride()
         {'vol0028' 'vol0029' 'vol0030' 'vol0031'}  % DY2
         {'vol0032' 'vol0033' 'vol0034'}            % DY3
         };
+
+    %% MOTION CORRECTION PARAMETERS BLOCK
+
     % Motion correction reference Volume
     defaults.motionCorrectionRefVol = 'vol0019';
     % [defaults.realignBaseDir]0 will contain analyses with all vols
@@ -33,7 +39,10 @@ function [ defaults ]=defaults_fallypride()
         {'vol0000'} % Analyses outputs in [defaults.realignBaseDir]1
         {'vol0000' 'vol0001'} % Analyses outputs in [defaults.realignBaseDir]2
         };
-    % Co-register bet for mean PET vol thresholded
+
+    %% COREGISTRATION PARAMETERS BLOCK
+
+    % Coregister bet for mean PET vol thresholded
     defaults.mniBaseDir='T1_2_MNI';
     defaults.coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001.nii';
     %  Subject BET -f values for T1 scan
@@ -43,10 +52,8 @@ function [ defaults ]=defaults_fallypride()
         'cerebellum_T1space.nii.gz'
         'putamen_T1space.nii.gz'
         };
-    
-    %Subject mean thresholded motion corrected volume to use for
-    %Co-register with Subject T1
-    % mean[defaults.motionCorrectionRefVol]_thr is used example : 'meanvol0019_thr'
+    % Thresholds for the ROIs in PET space
+    defaults.roiThresholds = [0.99 1];
     %  Subject BET -f values for PET scans
     defaults.petBet = [0, 0.3,0.4,0.5,0.6];
 
