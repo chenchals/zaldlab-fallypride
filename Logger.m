@@ -103,7 +103,7 @@ classdef Logger < handle
              % Log to console window
            if( self.ConsoleLevel <= level )
                for line = messageLines
-                   fprintf('%s\n', char(line));
+                   fprintf('%s', char(line));
                end
             end
             
@@ -145,8 +145,7 @@ classdef Logger < handle
             end
             
             function [ lines ] = createExceptionLogLines(level, exObj)
-                fx=exObj.stack(1).name;
-                lines{1}=formatLogLine(level, fx, strcat(exObj.identifier,'-',exObj.message));
+                lines{1}=formatLogLine(level, exObj.identifier, strcat(exObj.identifier,'-',exObj.message));
                 for i=1:numel(exObj.stack)
                     lines{end+1}=sprintf('\t\t%s > %s > %s\r\n'...
                         ,exObj.stack(i).file(max(strfind(exObj.stack(i).file,'/'))+1:end)...

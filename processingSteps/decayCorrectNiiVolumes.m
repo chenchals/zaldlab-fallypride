@@ -59,19 +59,32 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
   
   if(toBacquerel)
       logger.info(sprintf('FSL conversion from counts to mBq for subject %s',subject));
-      multiplyNii(decayCorrectedFileList,1/1000.0,'');
+      %multiplyNii(decayCorrectedFileList,1/1000.0,'');
+      multiplyCmds = multiplyNii(decayCorrectedFileList,1/1000.0,'');
+      for ii=1:numel(multiplyCmds)
+          cmdStr = multiplyCmds{ii};
+          logger.info(cmdStr);
+          system(cmdStr,'-echo');
+      end
   else
       logger.info(sprintf('FSL **NO conversion from counts to mBq** for subject %s',subject));
   end
   
   if(doDecayCorrection && numel([decayCorrectionVolSets{:}]))
       logger.info(sprintf('FSL Decay Correction for subject %s',subject));
-      for i=1:numel(decayCorrectionVolSets)
-          dcList = decayCorrectionVolSets{i};
+      decayCorrectionFactors(numel(decayCorrectionVolSets)) = 1;
+      for dc=1:numel(decayCorrectionVolSets)
+          dcList = decayCorrectionVolSets{dc};
           startEndAcqTimeIndex = regexp(dcList{1},'(\d{1,})$','tokens');
           startEndAcqTimeIndex = str2double(char(startEndAcqTimeIndex{1})) + 1;%29 for DY2
           dcList = strcat(subjectAnalysisDir, dcList,'.nii');
-          [dcFiles, decayCorrectionFactors(i)] = decayCorrectFiles(dcList,decayConstant,acqTimes(startEndAcqTimeIndex,:),decayCorrectionFileSuffix);
+          decayCorrectionFactors(dc) = getPetDecayCorrectionFactor(decayConstant,acqTimes(startEndAcqTimeIndex,:));
+          [multiplyCmds, dcFiles ] = multiplyNii(dcList, decayCorrectionFactors(dc), decayCorrectionFileSuffix);
+          for ii=1:numel(multiplyCmds)
+              cmdStr = multiplyCmds{ii};
+              logger.info(cmdStr);
+              system(cmdStr,'-echo');
+          end
           decayCorrectedFileList = regexprep(decayCorrectedFileList,dcList,dcFiles);
           clearvars dcList startEndAcqTimeIndex dcFiles;
       end
@@ -81,37 +94,21 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
     
 end
 
-%% Decay Correct file set
-function [ outFiles, decayFactor ] = decayCorrectFiles(niiFileList, halfLife, startEndAcqTime, decayCorrectSuffix)
-  params = evalin('caller','params');
-  decayFactor =  getPetDecayCorrectionFactor(halfLife,startEndAcqTime(1),startEndAcqTime(2));
-  outFiles = multiplyNii(niiFileList,decayFactor,decayCorrectSuffix);
-end
-
 %% Do fslmaths on files
-function [outFiles ] = multiplyNii(niiFileList, factor, fileSuffix)
-    logger = evalin('caller','params.logger');
+function [multiplyCmds, oFiles ] = multiplyNii(niiFileList, factor, fileSuffix)
     for ii = length(niiFileList):-1:1
         currFile = niiFileList{ii};
         [pathS,name,ext] = fileparts(currFile);
-        outFile = [pathS filesep name fileSuffix ext];
-        s =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor) ' ' outFile ];
-        % echo fsl cmd, output, status to matlab window.  This also ensures
-        % that Matlab 'waits' for the system command to execute.
-        logger.info(s)
-        system(s,'-echo');
-        outFiles(ii) = {outFile};
+        oFile = [pathS filesep name fileSuffix ext];
+        multiplyCmds{ii} =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor) ' ' oFile ];
+        oFiles{ii} = oFile;
     end
 end
 
 %% Compute decay correction factor
-function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, time1, time2 )
+function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, startEndTimes )
 %GETPETDECAYCORRECTIONFACTOR Decay correction factor for PET images
 % Source: http://www.turkupetcentre.net/petanalysis/decay.html
-%
-% Usage:
-%   factor = getPetDeacyCorrectionFactor (109.77, 5280, 6030)
-%
 % Inputs:
 %   halfLife : Half-life of isotope in minutes (F18 -> 109.77)
 %   time1    : Slice begin time secs (for DND040, DY2-> 5280, DY3-> 9367)
@@ -123,9 +120,10 @@ function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, time
 %  Copyright 2016
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
+    time1 = startEndTimes(1);
+    time2 = startEndTimes(2);
     halfLifeSecs = halfLife*60;
     lambda = log(2)/halfLifeSecs;
-    %numer = exp(time1.*lambda) * lambda .* (time2 - time1);
     numer = exp(lambda*time1) * lambda * (time2 - time1);
     denom = 1 - exp(-(lambda * (time2 - time1)));
     decayCorrectionFactor = numer / denom;

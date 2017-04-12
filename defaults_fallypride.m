@@ -1,15 +1,15 @@
 function [ defaults ]=defaults_fallypride()
     defaults.subject = '';
-    defaults.dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/';
-    defaults.mriDataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/';
-    defaults.analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Apr-11-4/Scan-1/';
-    defaults.realignBaseDir = 'analysis-set';
+    defaults.dataDir = '';
+    defaults.mriDataDir = '';
+    defaults.analysisDir = '';
+    defaults.realignBaseDir = '';
     % Subject's PMD analysis dir 
-    defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+    defaults.pmodAnalysisDir = '';
     % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
-    defaults.pmodNiiFileExt = '_Sess1_all_dy.nii';    
+    defaults.pmodNiiFileExt = '';    
     % PMOD acq times file [defaults.subject]_Sess1.acqtimes
-    defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
+    defaults.pmodAcqtimeFileExt ='';
     defaults.numberOfVols = 35;    
     
     %% DECAY CORRECTION PARAMETERS BLOCK

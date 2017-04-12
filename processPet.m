@@ -23,6 +23,7 @@ function processPet()
 % ***************************************************
 
 %
+  scriptDir = fileparts(mfilename('fullpath'));
   subjects=evalin('caller','subjects');
   params=evalin('caller','default_params()');
   defaults=evalin('caller','defaults');
@@ -41,10 +42,6 @@ function processPet()
       override.subject=subject;
       [subjectParams{subInd}, subjectErrors{subInd}]=validate(parseArgs(params,override));
   end
-  % Process current call
-  scriptdir = pwd;
-  addpath(scriptdir);
-  addpath([scriptdir filesep 'processingSteps']);
   
   % Use multicore if available
   tic;
@@ -53,20 +50,30 @@ function processPet()
       subject = params.subject;
       params.subjectAnalysisDir=[params.analysisDir subject filesep];
       paramsFile = [params.subjectAnalysisDir subject '_params.mat'];
+      params.paramsFile = paramsFile;
       if ~exist(params.subjectAnalysisDir,'dir')
           mkdir(params.subjectAnalysisDir)
-%        elseif previousRunSuccessful(paramsFile)
-%            continue;
+      else
+          if previousRunSuccessful(paramsFile)
+            continue;
+          else
+              cleanup(params);
+              mkdir(params.subjectAnalysisDir)
+          end
       end
-      params = updateAndSave(params,'paramsFile',  paramsFile);
       % Create logger
       params = addLogger(params);
       logger = params.logger;
+      errorLogger = Logger.getLogger([params.analysisDir 'error_petProcess.log']);
+      params.errorLogger = errorLogger;
+
+      logger.info(sprintf('***** Start analysis for subject: %s *****', params.subject));
+      saveParams(params);
       validationErrors = subjectErrors{ii};
       if numel(validationErrors.errors)>0
           msg=strjoin(validationErrors.errors,'\n');
           processingFailed(params,MException('processPet:validationErrors',msg));
-          cd(scriptdir);
+          cd(scriptDir);
           continue;
       end
       try
@@ -80,10 +87,10 @@ function processPet()
           params = saveParams(params);
           coregisterMeanPetWithT1(params);
           processingSuccessful(params);
-          cd(scriptdir);
+          cd(scriptDir);
       catch err % on error collect log
           processingFailed(params,err);
-          cd(scriptdir);
+          cd(scriptDir);
           continue;
       end % end try/catch
   end % end parfor
@@ -109,6 +116,7 @@ end
 %%
 function [] = processingSuccessful(params)
    params.logger.info([ params.subject ' :: Processing Successful']);
+   params.logger.info('**** Done Analysis for this subject *****');
    params.logger.info('********************************************');
    params.exception=[];
    updateAndSave(params,'isProcessingSuccessful',true);   
@@ -117,23 +125,29 @@ end
 %%
 function [] = processingFailed(params,exObj)
    params.logger.error(['*********' params.subject ' :: Processing Failed']);
+   params.errorLogger.error(['*********' params.subject ' :: Processing Failed']);
    params.logger.error(exObj);
-   params.logger.error('********************************************');
+   params.errorLogger.error(exObj);
+   params.logger.info('**** Done Analysis for this subject *****');
+   params.errorLogger.info('**** Done Analysis for this subject *****');
+   params.logger.info('********************************************');
+   params.errorLogger.info('********************************************');
    params.exception=exObj;
    updateAndSave(params,'isProcessingSuccessful',false);
-   %cleanup(params);
 end
 
 %% Cleanup all results for subject
 function [] = cleanup(params)
    %cleanup
-   outputDir = [params.analysisDir params.subject filesep];
-   cmds = {
-       ['rm -rf ' outputDir '*.nii*']
-       ['rm -rf ' outputDir '*.acqtimes*']
-       ['rm -rf ' outputDir params.realignBaseDir '*']
-       };
-   cellfun(@(x) system(x, '-echo'),cmds);
+%    outputDir = [params.analysisDir params.subject filesep];
+%    cmds = {
+%        ['rm -rf ' outputDir '*.nii*']
+%        ['rm -rf ' outputDir '*.acqtimes*']
+%        ['rm -rf ' outputDir params.realignBaseDir '*']
+%        };
+%    cellfun(@(x) system(x, '-echo'),cmds);
+    cmd = ['rm -rf ' params.subjectAnalysisDir];
+    system(cmd, '-echo');
 
 end
 

@@ -1,3 +1,17 @@
+%% Required setup for Matlab
+% ********************* Required ********************
+% Notes to execute fslmaths from within Matlab, include the following lines
+% in the startup.m file, then run startup.m or restart matlab
+% In terminal window run: which fsl to get the install location of fsl
+% Example: /usr/local/fsl/bin/fsl ==> fsldir = /usr/local/fsl
+% >>edit startup.m
+%     fsldir = '/usr/local/fsl';
+%     setenv('FSLDIR', fsldir);
+%     setenv('PATH',[fsldir, '/etc/matlab:', fsldir, '/bin:', fsldir, '/etc/fslconf:', getenv('PATH')]);
+%     % Check http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslEnvironmentVariables
+%     setenv('FSLOUTPUTTYPE','NIFTI');
+%     clear 'fsldir'
+% ***************************************************
 
 %% CMDLINE RUN
 % /Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processFallypride1;exit;"
@@ -6,19 +20,28 @@
 % default parameters
 default_params=@defaults_fallypride;
 % Change Default parameters globally for this run
-defaults.analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Apr-12-1/Scan-1/';
+defaults.dataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/';
+defaults.mriDataDir = '/Users/subravcr/teba/zaldlab/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/';
+defaults.analysisDir = '/Users/subravcr/teba/zaldlab-chenchal/Apr-12-2/Scan-1/';
+defaults.realignBaseDir = 'analysis-set';
+% Subject's PMD analysis dir
+defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+% PMOD nii file [defaults.subject]_Sess1_all_dy.nii
+defaults.pmodNiiFileExt = '_Sess1_all_dy.nii';
+% PMOD acq times file [defaults.subject]_Sess1.acqtimes
+defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
+defaults.numberOfVols = 35;
+
 
 %% SUBJECT Block
-% Subject List
-subjects = {
-    'DND005' %not good align - set 0
-    'DND007'
-    %     'DND014' %not good align - set 0,1,2
-    %     'DND016' %not good align - set 0
-    %     'DND018'
-    %     'DND022' %not good align - set 0,1,2
-    %     'DND023'
-    };
+%% All subjects
+allSubjects = getAllSubjects([defaults.dataDir, 'DND*']);
+subjects = allSubjects;
+%% Subject List
+% subjects = {
+%     'DND040' 
+%     'DND007'
+%     };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
 DND005.pmodNiiFileExt = '_Sess1_all_dy.nii';
@@ -27,3 +50,9 @@ DND005.petBet=[0 0.3 0.4];
 
 %% Call for Processing
 processPet;
+
+%% function to get all subjects
+function subjects = getAllSubjects(dirFilter)
+  dList = dir(dirFilter);
+  subjects = {dList.name};
+end
