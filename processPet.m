@@ -45,7 +45,7 @@ function processPet()
   
   % Use multicore if available
   tic;
-  parfor ii=1:length(subjectParams)
+  parfor ii=1:numel(subjectParams)
       params = subjectParams{ii};
       subject = params.subject;
       params.subjectAnalysisDir=[params.analysisDir subject filesep];
@@ -115,8 +115,7 @@ function params = saveParams(params)
 end
 %%
 function [] = processingSuccessful(params)
-   params.logger.info([ params.subject ' :: Processing Successful']);
-   params.logger.info('**** Done Analysis for this subject *****');
+   params.logger.info(sprintf('**** Processing Successful for subject %s *****',subject));
    params.logger.info('********************************************');
    params.exception=[];
    updateAndSave(params,'isProcessingSuccessful',true);   
@@ -124,12 +123,10 @@ end
 
 %%
 function [] = processingFailed(params,exObj)
-   params.logger.error(['*********' params.subject ' :: Processing Failed']);
-   params.errorLogger.error(['*********' params.subject ' :: Processing Failed']);
+   params.logger.info(sprintf('**** Processing failed for subject %s *****',subject));
+   params.errorLogger.info(sprintf('**** Processing failed for subject %s *****',subject));
    params.logger.error(exObj);
    params.errorLogger.error(exObj);
-   params.logger.info('**** Done Analysis for this subject *****');
-   params.errorLogger.info('**** Done Analysis for this subject *****');
    params.logger.info('********************************************');
    params.errorLogger.info('********************************************');
    params.exception=exObj;

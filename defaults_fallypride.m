@@ -4,7 +4,7 @@ function [ defaults ]=defaults_fallypride()
     defaults.mriDataDir = '';
     defaults.analysisDir = '';
     defaults.realignBaseDir = '';
-    % Subject's PMD analysis dir 
+    % Subject's PMOD analysis dir 
     defaults.pmodAnalysisDir = '';
     % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
     defaults.pmodNiiFileExt = '';    
