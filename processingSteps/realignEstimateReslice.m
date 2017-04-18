@@ -1,4 +1,4 @@
-function [ motionCorrectionFileLists, meanMotionCorrectedVol ] = realignEstimateReslice(params)
+function [ motionCorrectionFileLists, meanMotionCorrectedVol, acquisitionTimesList ] = realignEstimateReslice(params)
 %function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, subject)
 %REALIGNESTIMATERESLICE Motion correction for NIfTI images
 %Note correction is specific to studies of Fallypride. The function
@@ -58,10 +58,12 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol ] = realignEstimate
   motionCorrectionRefVol = params.motionCorrectionRefVol;
   motionCorrectionVolSetsToExclude = {{'None'} params.motionCorrectionVolSetsToExclude{:}};
   decayCorrectedFileList = params.decayCorrectedFileList;
+  acqTimes = params.acqTimes;
 
   % Outputs
   motionCorrectionFileLists{numel(motionCorrectionVolSetsToExclude)}=0;
   meanMotionCorrectedVol{numel(motionCorrectionVolSetsToExclude)}=0;
+  acquisitionTimesList{numel(motionCorrectionVolSetsToExclude)}=0;
   
   logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
   % Process spm batch for job
@@ -76,6 +78,8 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol ] = realignEstimate
           ,regexp(decayCorrectedFileList,join(strcat('.*',volsToExclude,'.*'),'|')...
           ,'match'));
       realignList = decayCorrectedFileList(includeIndex);
+      realignAcqTimes = acqTimes(includeIndex,:);
+      
       logger.info(sprintf('Motion correction: Setting reference volume [ %s ]',motionCorrectionRefVol));
       refIndex = find(~cellfun(@isempty, regexp(realignList,strcat('.*',motionCorrectionRefVol,'.*'),'match')));
       realignList = [realignList(refIndex) realignList];
@@ -110,6 +114,11 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol ] = realignEstimate
       % Clear Job vars
       clear batchJob jobOutput
       
+      %Write new acquisition times for dropped volumes
+      fname=[realignedDir,subject,'_acquisitionTimes.acqtimes'];
+      logger.info(sprintf('Motion correction: Writing acquisition times file [ %s ]',fname));
+      writePmodTimingFile(realignAcqTimes, fname);
+      acquisitionTimesList{ii}=realignAcqTimes;
   end
 
 end
@@ -130,4 +139,13 @@ function [ matlabbatch ] = createJob(realignList)
     matlabbatch.spm.spatial.realign.estwrite.roptions.mask = 1;
     matlabbatch.spm.spatial.realign.estwrite.roptions.prefix = 'r';
 end
-
+function writePmodTimingFile(acqTimes, fname)
+    fid=fopen(fname, 'w');
+    nVols=size(acqTimes,1);
+    fprintf(fid, '# Acquisition times (start end)in seconds\n');
+    fprintf(fid, '%d # Number of acquisitions\n', nVols);
+    for ii=1:size(acqTimes,1)
+        fprintf(fid,'%0.1f\t%0.1f\n',acqTimes(ii,:));
+    end
+    fclose(fid);
+end
