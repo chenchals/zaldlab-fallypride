@@ -22,7 +22,9 @@
 default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
 rootDataDir = '/mnt/teba/';
-rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
+rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-2/';
+% Directory name prefix for each subject: DND005, DND017, etc
+subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/'];
 defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/'];
 defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-1/'];
