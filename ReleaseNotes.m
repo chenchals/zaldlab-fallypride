@@ -8,6 +8,9 @@
 % Modification Logs
 % Use: git log --date=short --pretty=format:"%% %cd %s"
 %
+% 2017-04-26 updated shellScript for running batch process from terminal window in fsl-vm
+% 2017-04-26 Removed unused functions/files and moved processing modules to sub-dir
+% 2017-04-26 Added releasee notes
 % 2017-04-26 Removed for consistent file naming
 % 2017-04-26 Updated files after running for Fallypride and PE2I
 % 2017-04-18 updated release notes
