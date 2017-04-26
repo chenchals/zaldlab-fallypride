@@ -1,105 +1,114 @@
-function [ outFiles, decayFactorDy2, decayFactorDy3 ] = decayCorrectNiiVolumes(niiFileList, acqTimes, halfLifeInMins, toBacquerel)
-%DECAYCORRECTNIIVOLUMES Use decay correction for Fallypride for the nii
-%                       volumes form thre DY2 and DY3 epochs. These are
-%                       typically vol0028-vol0031 (4 vols, DY2) and
-%                       vol0032-vol0034 (3 vols, DY3).  
-%                       Writes out files with "_dc".nii. Example
-%                       v0028_dc.nii.
+function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVolumes(params)
+%DECAYCORRECTNIIVOLUMES Decay correction for volumnes acquired with delays.
+%   For Fallypride typically DY1, DY2, and DY3 epochs. DY2 starts at
+%   vol0029 and DY3 at vol0032
 %
-% Usage:
-%   decayCorrectNiiVolumes (niiFileList, acqTimes, halfLifeInMins)
-%
-% Inputs:
-%   niiFileList    : List of vol files.  Must be exactly 35 files
-%   acqTimes       : A [35x2 double]. Volume startTime and  endTime. Must
-%                    be exactly 35 rows.
-%   halfLifeInMins : Half-life of isotope in minutes (F18 -> 109.77)
-%
-% Output: 
-%   decayCorrectionFactor
-%
-% ********************* Required ********************
-% Notes to execute fslmaths from within Matlab, include the following lines
-% in the startup.m file, then run startup.m or restart matlab
-% >>edit startup.m
-% In the Editor window check/add the following lines:
-%     setenv( 'FSLDIR', '/usr/local/fsl' );
-%     fsldir = getenv('FSLDIR');
-%     fsldirmpath = sprintf('%s/etc/matlab',fsldir);
-%     path(path, fsldirmpath);
-%     %set env for path
-%     setenv('PATH',[fsldir '/bin:', fsldir '/etc/fslconf:', getenv('PATH')]);
-%     % Check http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslEnvironmentVariables
-%     setenv('FSLOUTPUTTYPE','NIFTI');
-%     clear 'fsldir' 'fsldirmpath'
-% ***************************************************
-%
-%  Copyright 2016
+%   Inputs:
+%   params.subject : Subject Id
+%   params.subjectAnalysisDir : Subject directory containing vol*.nii files 
+%   params.logger : Logger for logging progress 
+%   params.niiFileList : Full filepath of nii files fro this function
+%   params.numberOfVols : Total number of PET volumes;    
+%   params.countsToBacquerel : (true|false) Convert PET Counts to Bq correction flag;
+%   params.doDecayCorrection : (true|false) Decay correction for PET scans done at Gaps DY2, DY3..;
+%   params.decayConstant : Decay constant in minutes (109.77 Fallypride) 
+%   params.decayCorrectionFileSuffix : _dc -  Include only tdecay correction is needed   
+%   params.acqTimes : Acquisition times. Array [params.numberOfVols, 2]
+%           The start and end time of slices for each volume
+%   params.decayCorrectionVolSets : List of nii volumes to apply decay
+%          correction Zero-based. Example for Fallypride
+%          {
+%           {'vol0028' 'vol0029' 'vol0030' 'vol0031'}  % DY2
+%           {'vol0032' 'vol0033' 'vol0034'}            % DY3
+%          };
+%   Outputs:
+%   decayCorrectedFileList : A cell array of all subject filenames with decay
+%            corrected files
+%   decayCorrectionFactors : The multiplication factors used for different
+%   epochs for decay correction
+%  Copyright 2017
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
  
   batchFunction='decayCorrectNiiVolumes';
   % Set fsloutputtype to NIFTI
   setenv('FSLOUTPUTTYPE','NIFTI');
-  s = regexp(niiFileList{1},'.*/(?<subject>DND\d*)/vol.*nii$','once','names');
-  subject = s.subject;
-  fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
-
+  % Inputs
+  subject = params.subject;
+  subjectAnalysisDir = params.subjectAnalysisDir;
+  logger=params.logger;
+  niiFileList = params.niiFileList;
+  numberOfVols = params.numberOfVols;
+  toBacquerel = params.countsToBacquerel;
+  doDecayCorrection = params.doDecayCorrection;
+  decayConstant = params.decayConstant;
+  decayCorrectionFileSuffix = params.decayCorrectionFileSuffix;
+  acqTimes = params.acqTimes;
+  decayCorrectionVolSets = params.decayCorrectionVolSets;
+  % Outputs
+  decayCorrectedFileList = niiFileList;
+  decayCorrectionFactors = [];
+  
+  logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
   % Check list length and acqTimes size
-  if(length(niiFileList)~=35 || sum(size(acqTimes)==[35,2])~=2)
-      error('Number of nii files in the niiFileList not 35 Or size of acqTimes is not [35 x 2]')
+  if(numel(niiFileList)~=numberOfVols || numel(acqTimes)~=(numberOfVols*2))
+      msg=sprintf('Number of nii files %d in niiFileList not equal to %d Or size of acqTimes is not [%d x 2]',...
+          numel(niiFileList), numberOfVols, numberOfVols);
+      throw(MException('decayCorrectNiiVolumes:invalidNumberOfFiles',msg));
   end
   
   if(toBacquerel)
-  % Multiply by 0.001 to counts -> mBq
-     fprintf('\n\t%s: FSL Convert to mBq for subject: %s\n',batchFunction, subject);
-     outFilesDy1 = multiplyNii(niiFileList(1:35),1/1000.0,'');
+      logger.info(sprintf('FSL conversion from counts to mBq for subject %s',subject));
+      %multiplyNii(decayCorrectedFileList,1/1000.0,'');
+      multiplyCmds = multiplyNii(decayCorrectedFileList,1/1000.0,'');
+      for ii=1:numel(multiplyCmds)
+          cmdStr = multiplyCmds{ii};
+          logger.info(cmdStr);
+          system(cmdStr,'-echo');
+      end
   else
-     outFilesDy1 = niiFileList(1:28); 
+      logger.info(sprintf('FSL **NO conversion from counts to mBq** for subject %s',subject));
   end
   
-  % Decay correct DY2 Epoch files
-  fprintf('\n\t%s: FSL decay correct DY2 for subject: %s\n',batchFunction, subject);
-  [outFilesDy2, decayFactorDy2] = decayCorrectFiles(niiFileList(29:32),halfLifeInMins,acqTimes(29,:));
-  
-  % Decay correct DY3 Epoch files
-  fprintf('\n\t%s: FSL decay correct DY3 for subject: %s\n',batchFunction, subject);
-  [outFilesDy3, decayFactorDy3] = decayCorrectFiles(niiFileList(33:35),halfLifeInMins,acqTimes(33,:));
-  
-  % Check all files are written
-  outFiles = {outFilesDy1{:}, outFilesDy2{:}, outFilesDy3{:}}';
-  
-end
-
-%% Decay Correct file set
-function [ outFiles, decayFactor ] = decayCorrectFiles(niiFileList, halfLife, startEndAcqTime)
-  decayFactor =  getPetDecayCorrectionFactor(halfLife,startEndAcqTime(1),startEndAcqTime(2));
-  outFiles = multiplyNii(niiFileList,decayFactor,'_dc');
+  if(doDecayCorrection && numel([decayCorrectionVolSets{:}]))
+      logger.info(sprintf('FSL Decay Correction for subject %s',subject));
+      decayCorrectionFactors(numel(decayCorrectionVolSets)) = 1;
+      for dc=1:numel(decayCorrectionVolSets)
+          dcList = decayCorrectionVolSets{dc};
+          startEndAcqTimeIndex = regexp(dcList{1},'(\d{1,})$','tokens');
+          startEndAcqTimeIndex = str2double(char(startEndAcqTimeIndex{1})) + 1;%29 for DY2
+          dcList = strcat(subjectAnalysisDir, dcList,'.nii');
+          decayCorrectionFactors(dc) = getPetDecayCorrectionFactor(decayConstant,acqTimes(startEndAcqTimeIndex,:));
+          [multiplyCmds, dcFiles ] = multiplyNii(dcList, decayCorrectionFactors(dc), decayCorrectionFileSuffix);
+          for ii=1:numel(multiplyCmds)
+              cmdStr = multiplyCmds{ii};
+              logger.info(cmdStr);
+              system(cmdStr,'-echo');
+          end
+          decayCorrectedFileList = regexprep(decayCorrectedFileList,dcList,dcFiles);
+          clearvars dcList startEndAcqTimeIndex dcFiles;
+      end
+  else
+      logger.info(sprintf('FSL **NO Decay Correction** for subject %s',subject));
+  end
+    
 end
 
 %% Do fslmaths on files
-function [outFiles ] = multiplyNii(niiFileList, factor, fileSuffix)
-    for ii=length(niiFileList):-1:1
-        currFile=niiFileList{ii};
-        [pathS,name,ext]=fileparts(currFile);
-        outFile = [pathS filesep name fileSuffix ext];
-        s =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor) ' ' outFile ];
-        % echo fsl cmd, output, status to matlab window.  This also ensures
-        % that Matlab 'waits' for the system command to execute.
-        disp(s)
-        system(s,'-echo');
-        outFiles(ii) = {outFile};
+function [multiplyCmds, oFiles ] = multiplyNii(niiFileList, factor, fileSuffix)
+    for ii = length(niiFileList):-1:1
+        currFile = niiFileList{ii};
+        [pathS,name,ext] = fileparts(currFile);
+        oFile = [pathS filesep name fileSuffix ext];
+        multiplyCmds{ii} =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor) ' ' oFile ];
+        oFiles{ii} = oFile;
     end
 end
 
 %% Compute decay correction factor
-function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, time1, time2 )
+function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, startEndTimes )
 %GETPETDECAYCORRECTIONFACTOR Decay correction factor for PET images
 % Source: http://www.turkupetcentre.net/petanalysis/decay.html
-%
-% Usage:
-%   factor = getPetDeacyCorrectionFactor (109.77, 5280, 6030)
-%
 % Inputs:
 %   halfLife : Half-life of isotope in minutes (F18 -> 109.77)
 %   time1    : Slice begin time secs (for DND040, DY2-> 5280, DY3-> 9367)
@@ -111,6 +120,8 @@ function [ decayCorrectionFactor ] = getPetDecayCorrectionFactor( halfLife, time
 %  Copyright 2016
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
+    time1 = startEndTimes(1);
+    time2 = startEndTimes(2);
     halfLifeSecs = halfLife*60;
     lambda = log(2)/halfLifeSecs;
     numer = exp(lambda*time1) * lambda * (time2 - time1);

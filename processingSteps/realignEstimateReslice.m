@@ -1,4 +1,4 @@
-function [ realignSets ] = realignEstimateReslice(subject, params)
+function [ motionCorrectionFileLists, meanMotionCorrectedVol, acquisitionTimesList ] = realignEstimateReslice(params)
 %function [ realignSets ] = realignEstimateReslice(niiBaseDir, realignBaseDir, subject)
 %REALIGNESTIMATERESLICE Motion correction for NIfTI images
 %Note correction is specific to studies of Fallypride. The function
@@ -49,93 +49,83 @@ function [ realignSets ] = realignEstimateReslice(subject, params)
 %  Copyright 2016
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
-    batchFunction='realignEstimateReslice';
-    fprintf('\nProcessing for subject: %s\t%s\n',subject,batchFunction);
-    
-    %Parameters
-    analysisDir = params.analysisDir;
-    realignBaseDir = params.realignBaseDir;
+  batchFunction='realignEstimateReslice';
+  % Inputs
+  subject = params.subject;
+  subjectAnalysisDir = params.subjectAnalysisDir;
+  logger=params.logger;
+  realignBaseDir = params.realignBaseDir;
+  motionCorrectionRefVol = params.motionCorrectionRefVol;
+  motionCorrectionVolSetsToExclude = {{'None'} params.motionCorrectionVolSetsToExclude{:}};
+  decayCorrectedFileList = params.decayCorrectedFileList;
+  acqTimes = params.acqTimes;
 
-    % Process spm batch for job
-    % Initialize subject specific variables
-    initObj=initializeVars(analysisDir, subject);
-    realignList=initObj.realignList;
-    realignSets{3}=[]; % initialize cell array
-    % Run current job function, passing along subject-specific inputs
-    notUsingFiles = '[Using all volumes]';
-    for ii=1:3 % Run 3 realignments
-        if (ii>1)
-            offsetIndex = ii + 1; % vol offset 2 for set 1
-            initObj.realignList=[realignList(1); realignList(offsetIndex:length(realignList))];
-            if(ii==2)
-                notUsingFiles='Not using [vol000.nii]';
-            elseif(ii==3)
-                notUsingFiles='Not using [vol000.nii, vol0001.nii]';
-            end
-        end
-       fprintf('\n\t%s: For subject: %s\t%s\n', batchFunction, subject, notUsingFiles);
-        
-        % Run current job function, passing along subject-specific inputs
-        batchJob{1} = createJob(initObj);
-        spm('defaults','PET');
-        spm_jobman('initcfg');
-        
-        jobOutput = spm_jobman('run', batchJob);
-        %spm_realign(initObj.realignList);
-        
-        % Save output (e.g., matlabbatch) for future reference
-        outName = strcat(initObj.niiDir,filesep,subject,'_',batchFunction,'_set_',num2str(ii-1));
-        save(outName, 'batchJob');
-        save([outName,'_jobOutput'], 'jobOutput');
-        
-        % Copy / rename files and move to appropriate sub-directory
-        realignedDir=[initObj.niiDir, filesep, realignBaseDir, num2str(ii-1)];
-        mkdir(realignedDir);
-        copyfile([initObj.niiDir,filesep,'r*.*'], [realignedDir, filesep,'.']);
-        delete([initObj.niiDir,filesep,'r*.*']);
-        copyfile([initObj.niiDir,filesep,'mean*.*'], [realignedDir, filesep,'.']);
-        delete([initObj.niiDir,filesep,'mean*.*']);
-        copyfile([initObj.niiDir,filesep,'*_set_*.*'], [realignedDir, filesep,'.']);
-        delete([initObj.niiDir,filesep,'*_set_*.*']);
-        % Other outputs
-        realignSets{ii,1} = initObj.realignList;
-                
-        
-        % Clear Job vars
-        clear jobs outName batchJob jobOutput harvestedJob        
-        
-    end
+  % Outputs
+  motionCorrectionFileLists{numel(motionCorrectionVolSetsToExclude)}=0;
+  meanMotionCorrectedVol{numel(motionCorrectionVolSetsToExclude)}=0;
+  acquisitionTimesList{numel(motionCorrectionVolSetsToExclude)}=0;
+  
+  logger.info(sprintf('Processing for subject: %s\t%s',subject,batchFunction));
+  % Process spm batch for job
+  
+  for ii=1:numel(motionCorrectionVolSetsToExclude)
+      logger.info(sprintf('Motion correction: Analysis Set %d',ii-1));
+
+      volsToExclude = motionCorrectionVolSetsToExclude{ii};
+      logger.info(sprintf('Motion correction: Excluding volumes [ %s ]',join(volsToExclude,' ')));
+      
+      includeIndex = cellfun(@isempty...
+          ,regexp(decayCorrectedFileList,join(strcat('.*',volsToExclude,'.*'),'|')...
+          ,'match'));
+      realignList = decayCorrectedFileList(includeIndex);
+      realignAcqTimes = acqTimes(includeIndex,:);
+      
+      logger.info(sprintf('Motion correction: Setting reference volume [ %s ]',motionCorrectionRefVol));
+      refIndex = find(~cellfun(@isempty, regexp(realignList,strcat('.*',motionCorrectionRefVol,'.*'),'match')));
+      realignList = [realignList(refIndex) realignList];
+      realignList(refIndex+1) = [];
+      
+      % Run current job function, passing along subject-specific inputs
+      logger.info(sprintf('Motion correction: Create SPM batch job'));
+      batchJob{1} = createJob(realignList);
+      spm('defaults','PET');
+      spm_jobman('initcfg');    
+      logger.info(sprintf('Motion correction: Running SPM batch job'));
+      jobOutput = spm_jobman('run', batchJob);
+      % Save output (e.g., matlabbatch) for future reference
+      logger.info(sprintf('Motion correction: Saving SPM batch job'));
+      outName = strcat(subjectAnalysisDir,subject,'_',batchFunction,'_set_',num2str(ii-1));
+      save(outName, 'batchJob');
+      save([outName,'_jobOutput'], 'jobOutput');
+      % Copy / rename files and move to appropriate sub-directory
+      realignedDir=[subjectAnalysisDir, realignBaseDir, num2str(ii-1), filesep];
+      logger.info(sprintf('Motion correction: Copying SPM batch job output to anslysisDir %s', realignedDir));
+      mkdir(realignedDir);
+      copyfile([subjectAnalysisDir,'r*.*'], [realignedDir,'.']);
+      delete([subjectAnalysisDir,'r*.*']);
+      copyfile([subjectAnalysisDir,'mean*.*'], [realignedDir, '.']);
+      delete([subjectAnalysisDir,'mean*.*']);
+      copyfile([subjectAnalysisDir,'*_set_*.*'], [realignedDir, '.']);
+      delete([subjectAnalysisDir,'*_set_*.*']);
+      % Output
+      motionCorrectionFileLists{ii} = realignList;
+      meanMotionCorrectedVol{ii} = strcat(realignedDir,'mean',motionCorrectionRefVol,'.nii');
+            
+      % Clear Job vars
+      clear batchJob jobOutput
+      
+      %Write new acquisition times for dropped volumes
+      fname=[realignedDir,subject,'_acquisitionTimes.acqtimes'];
+      logger.info(sprintf('Motion correction: Writing acquisition times file [ %s ]',fname));
+      writePmodTimingFile(realignAcqTimes, fname);
+      acquisitionTimesList{ii}=realignAcqTimes;
+  end
+
 end
 
-% Initialize variables
-function [ initObj ] = initializeVars(niiBaseDir, subject)
-    % SPM info
-    initObj.spmDir = fileparts(which('spm'));
-
-    % Input
-    initObj.subject = subject;
-    initObj.outDir = niiBaseDir;
-    % Directory containing the nii files
-    initObj.niiDir = strcat(niiBaseDir,initObj.subject);
-
-    % Order of nii files for realign
-    refVolume=19;
-    volsDY1=num2cell([refVolume,0:refVolume-1,refVolume+1:27]);
-    % Non-decay corrected files
-    listDY1=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'.nii,1'], ...
-        volsDY1,'UniformOutput',false);
-    % Decay corrected files
-    volsDY23=num2cell([28:34]);
-    listDY23=cellfun(@(x) [initObj.niiDir,filesep,'vol',num2str(x,'%04d'),'_dc.nii,1'], ...
-        volsDY23,'UniformOutput',false);
-    % Merge file lists
-    initObj.realignList = [listDY1,listDY23]';
-    
-end 
-
 % Create matlabbatch job
-function [ matlabbatch ] = createJob(initVars)
-    matlabbatch.spm.spatial.realign.estwrite.data = {initVars.realignList};
+function [ matlabbatch ] = createJob(realignList)
+    matlabbatch.spm.spatial.realign.estwrite.data = {realignList};
     matlabbatch.spm.spatial.realign.estwrite.eoptions.quality = 0.9;
     matlabbatch.spm.spatial.realign.estwrite.eoptions.sep = 4;
     matlabbatch.spm.spatial.realign.estwrite.eoptions.fwhm = 5;
@@ -148,6 +138,14 @@ function [ matlabbatch ] = createJob(initVars)
     matlabbatch.spm.spatial.realign.estwrite.roptions.wrap = [0 0 0];
     matlabbatch.spm.spatial.realign.estwrite.roptions.mask = 1;
     matlabbatch.spm.spatial.realign.estwrite.roptions.prefix = 'r';
-  
 end
-
+function writePmodTimingFile(acqTimes, fname)
+    fid=fopen(fname, 'w');
+    nVols=size(acqTimes,1);
+    fprintf(fid, '# Acquisition times (start end)in seconds\n');
+    fprintf(fid, '%d # Number of acquisitions\n', nVols);
+    for ii=1:size(acqTimes,1)
+        fprintf(fid,'%0.1f\t%0.1f\n',acqTimes(ii,:));
+    end
+    fclose(fid);
+end

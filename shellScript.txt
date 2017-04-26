@@ -1,4 +1,11 @@
+# Assumtion: Running in [zaldlab-computer]/fslvm
+# Check: teba* is mounted at /mnt/teba, /mnt/teba2014, /mnt/teba2016
+# Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/default*
+# Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/process*
 
-/Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processScan1;exit;"
-
-/Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processScan2;exit;"
+# For Fallypride Scan-1
+/usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis'));processFallypride1;exit;"
+# For Fallypride Scan-2
+/usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis'));processFallypride2;exit;"
+# For PE2I
+/usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis'));processPe2i;exit;"
