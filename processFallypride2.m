@@ -14,8 +14,8 @@
 % ***************************************************
 
 %% CMDLINE RUN
-% /Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processFallypride1;exit;"
-% /usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/Chenchal/Code/zaldlab-fallypride'));processFallypride1;exit;"
+% /Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processFallypride2;exit;"
+% /usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/Chenchal/Code/zaldlab-fallypride'));processFallypride2;exit;"
 
 %% DEFAULT PARAMETER setup block
 % default parameters
@@ -23,16 +23,18 @@ default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
 rootDataDir = '/mnt/teba/';
 rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
-defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/'];
+% Directory name prefix for each subject: DND005, DND017, etc
+subjectDirNamePrefix = 'DND*';
+defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_2/'];
 defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/'];
-defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-1/'];
+defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-2/'];
 defaults.realignBaseDir = 'analysis-set';
 % Subject's PMOD analysis dir
 defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
 % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
-defaults.pmodNiiFileExt = '_Sess1_all_dy.nii';
+defaults.pmodNiiFileExt = '_Sess2_all_dy.nii';
 % PMOD acq times file [defaults.subject]_Sess1.acqtimes
-defaults.pmodAcqtimeFileExt ='_Sess1.acqtimes';
+defaults.pmodAcqtimeFileExt ='_Sess2.acqtimes';
 defaults.numberOfVols = 35;
 
 %% SUBJECT Block
@@ -40,7 +42,7 @@ defaults.numberOfVols = 35;
 allSubjects = dir([defaults.dataDir, subjectDirNamePrefix]);
 allSubjects = {allSubjects.name};
 subjects = allSubjects;
-%% Subject List
+%% Subject List to override allSubjects
 % subjects = {
 %     'DND040' 
 %     'DND007'

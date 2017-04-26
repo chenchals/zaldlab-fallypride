@@ -115,7 +115,7 @@ function params = saveParams(params)
 end
 %%
 function [] = processingSuccessful(params)
-   params.logger.info(sprintf('**** Processing Successful for subject %s *****',subject));
+   params.logger.info(sprintf('**** Processing Successful for subject %s *****',params.subject));
    params.logger.info('********************************************');
    params.exception=[];
    updateAndSave(params,'isProcessingSuccessful',true);   
@@ -123,8 +123,8 @@ end
 
 %%
 function [] = processingFailed(params,exObj)
-   params.logger.info(sprintf('**** Processing failed for subject %s *****',subject));
-   params.errorLogger.info(sprintf('**** Processing failed for subject %s *****',subject));
+   params.logger.info(sprintf('**** Processing failed for subject %s *****',params.subject));
+   params.errorLogger.info(sprintf('**** Processing failed for subject %s *****',params.subject));
    params.logger.error(exObj);
    params.errorLogger.error(exObj);
    params.logger.info('********************************************');
