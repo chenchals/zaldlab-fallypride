@@ -28,7 +28,7 @@ rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
 subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/PE2I/'];
 defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/'];
-defaults.analysisDir = [rootAnalysisDir 'PE2I'];
+defaults.analysisDir = [rootAnalysisDir 'PE2I/'];
 defaults.realignBaseDir = 'analysis-set';
 
 % Subject's PMOD analysis dir
