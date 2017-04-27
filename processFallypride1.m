@@ -23,6 +23,8 @@ default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
 rootDataDir = '/mnt/teba/';
 rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
+% Directory name prefix for each subject: DND005, DND017, etc
+subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/'];
 defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/'];
 defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-1/'];
@@ -47,6 +49,29 @@ subjects = allSubjects;
 %     };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
+% Exceptions for DND040
+DND040.mriDataDir = '/mnt/teba/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/DND040/DND040_Scan_2/T1_2_MNI/';
+
+% Exceptions for DND032
+DND032.dataDir = '/mnt/teba/Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/DND032/Decay/PMOD_Processed/';
+
+% Exceptions for DND072
+DND072.coWipT1Sense = 'DND072_T1.nii.gz';
+    DND072.brainT1Rois = {
+        'cerebellum_T1space.nii'
+        'putamen_T1space.nii'
+        };
+    
+% Exceptions for DND078
+DND078.coWipT1Sense = 'DND078_T1.nii.gz';
+
+% Exceptions for DND080
+DND080.coWipT1Sense = 'DND080_T1.nii.gz';
+
+% Exceptions for DND084
+DND084.coWipT1Sense = 'coWIPWIPT1W3DTFESENSEs002a001.nii';
+
+% EXAMPLE 
 % DND005.pmodNiiFileExt = '_Sess1_all_dy.nii';
 % DND005.t1Bet=[0 0.6];
 % DND005.petBet=[0 0.3 0.4];
