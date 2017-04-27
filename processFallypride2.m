@@ -49,6 +49,23 @@ subjects = allSubjects;
 %     };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
+% Exceptions for DND062
+DND062.numberOfVols = 34;
+
+% Exceptions for DND072
+DND072.coWipT1Sense = 'DND072_T1.nii.gz';
+    DND072.brainT1Rois = {
+        'cerebellum_T1space.nii'
+        'putamen_T1space.nii'
+        };
+    
+% Exceptions for DND078
+DND078.coWipT1Sense = 'DND078_T1.nii.gz';
+
+% Exceptions for DND080
+DND080.coWipT1Sense = 'DND080_T1.nii.gz';
+
+% EXAMPLE
 % DND005.pmodNiiFileExt = '_Sess1_all_dy.nii';
 % DND005.t1Bet=[0 0.6];
 % DND005.petBet=[0 0.3 0.4];
