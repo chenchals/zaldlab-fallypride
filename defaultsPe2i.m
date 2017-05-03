@@ -55,6 +55,7 @@ function [ defaults ]=defaultsPe2i()
     % Thresholds for the ROIs in PET space
     defaults.roiThresholds = [0.99 1];
     %  Subject BET -f values for PET scans
+    defaults.meanPetVolThreshold = 1;
     defaults.petBet = [0, 0.3,0.4,0.5,0.6];
 
 end

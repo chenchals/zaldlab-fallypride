@@ -21,8 +21,8 @@
 % default parameters
 default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
-rootDataDir = '/mnt/teba/';
-rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
+rootDataDir = '/Volumes/zaldlab/';
+rootAnalysisDir = '/Volumes/zaldlab2016/Chenchal/May-02-1/';
 % Directory name prefix for each subject: DND005, DND017, etc
 subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/'];

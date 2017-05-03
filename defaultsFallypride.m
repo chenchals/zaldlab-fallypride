@@ -57,6 +57,7 @@ function [ defaults ]=defaultsFallypride()
     % Thresholds for the ROIs in PET space
     defaults.roiThresholds = [1 0.99];
     %  Subject BET -f values for PET scans
+    defaults.meanPetVolThreshold = 1;
     defaults.petBet = [0, 0.3,0.4,0.5,0.6];
 
 end
