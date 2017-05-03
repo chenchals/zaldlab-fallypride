@@ -1,0 +1,14 @@
+# Assumtion: Running in [zaldlab-computer]/fslvm
+# Check: teba* is mounted at /mnt/teba, /mnt/teba2014, /mnt/teba2016
+# Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/default*
+# Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/process*
+# To run this batch from bash command line:
+# 1. Uncomment the relevant lines
+# 2. >bash /path/to/file/shellScript.txt
+
+# For Fallypride Scan-1
+/Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processFallypride1;exit;"
+# For Fallypride Scan-2
+/Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processFallypride2;exit;"
+# For PE2I
+/Applications/MATLAB_R2016b.app/bin/matlab -nodisplay -r "addpath(genpath('/Users/subravcr/Projects/zaldlab-fallypride'));processPe2i;exit;"
