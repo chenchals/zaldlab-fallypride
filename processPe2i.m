@@ -50,6 +50,16 @@ subjects = allSubjects;
 %     };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
+%% DND078 Exceptions
+DND078.coWipT1Sense = 'DND078_T1.nii.gz';
+
+%% DND072 Exceptions
+DND072.coWipT1Sense = 'DND072_T1.nii.gz';
+    DND072.brainT1Rois = {
+        'cerebellum_T1space.nii'
+        'putamen_T1space.nii'
+        };
+
 %% DND041 Exceptions
 DND041.pmodAnalysisDir = '90min/';
 DND041.pmodAcqtimeFileExt ='.acqtimes';
