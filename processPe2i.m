@@ -22,7 +22,7 @@
 % default parameters
 default_params=@defaultsPe2i;
 % Change Default parameters globally for this run
-rootDataDir = '/Volumes/zaldlab/';
+rootDataDir = '/Volumes/zaldlab';
 rootAnalysisDir = '/Volumes/zaldlab2016/Chenchal/May-02-1/';
 % Directory name prefix for each subject: DND005, DND017, etc
 subjectDirNamePrefix = 'DND*';
@@ -32,7 +32,7 @@ defaults.analysisDir = [rootAnalysisDir 'PE2I/'];
 defaults.realignBaseDir = 'analysis-set';
 
 % Subject's PMOD analysis dir
-defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+defaults.pmodAnalysisDir = 'Decay/PMOD_Processed/';
 % PMOD nii file [defaults.subject]_PE2I_all_dy.nii
 defaults.pmodNiiFileExt = '_PE2I_all_dy.nii';
 % PMOD acq times file [defaults.subject]_PE2I.acqtimes

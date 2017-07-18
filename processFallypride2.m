@@ -21,8 +21,8 @@
 % default parameters
 default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
-rootDataDir = '/Volumes/zaldlab/';
-rootAnalysisDir = '/Volumes/zaldlab2016/Chenchal/May-02-1/';
+rootDataDir = '/mnt/teba/';
+rootAnalysisDir = '/mnt/teba2016/Chenchal/May-02-1/';
 % Directory name prefix for each subject: DND005, DND017, etc
 subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_2/'];
@@ -30,7 +30,7 @@ defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Dat
 defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-2/'];
 defaults.realignBaseDir = 'analysis-set';
 % Subject's PMOD analysis dir
-defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+defaults.pmodAnalysisDir = 'Decay/PMOD_Processed/';
 % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
 defaults.pmodNiiFileExt = '_Sess2_all_dy.nii';
 % PMOD acq times file [defaults.subject]_Sess1.acqtimes
@@ -49,34 +49,25 @@ subjects = allSubjects;
 %     };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
+% Exceptions for DND074
+DND074.coWipT1Sense = 'DND074_T1.nii';
+
 % Exceptions for DND062
 DND062.numberOfVols = 34;
 
 % Exceptions for DND072
 DND072.coWipT1Sense = 'DND072_T1.nii.gz';
-    DND072.brainT1Rois = {
-        'cerebellum_T1space.nii'
-        'putamen_T1space.nii'
-        };
-    
+DND072.brainT1Rois = {
+    'cerebellum_T1space.nii'
+    'putamen_T1space.nii'
+    };
+
 % Exceptions for DND078
 DND078.coWipT1Sense = 'DND078_T1.nii.gz';
 
 % Exceptions for DND080
 DND080.coWipT1Sense = 'DND080_T1.nii.gz';
 
-% EXAMPLE
-% DND005.pmodNiiFileExt = '_Sess1_all_dy.nii';
-% DND005.t1Bet=[0 0.6];
-% DND005.petBet=[0 0.3 0.4];
-% 
-% DND005.motionCorrectionRefVol = 'vol0017';
-% % [defaults.realignBaseDir]0 will contain analyses with all vols
-% DND005.motionCorrectionVolSetsToExclude={
-%     {'vol0000'} % Analyses outputs in [defaults.realignBaseDir]1
-%     {'vol0000' 'vol0001'} % Analyses outputs in [defaults.realignBaseDir]2
-%     {'vol0019' } % Analyses outputs in [defaults.realignBaseDir]2
-%     };
 
 %% Call for Processing
 processPet;

@@ -43,7 +43,7 @@ function [ defaults ]=defaultsPe2i()
     %% COREGISTRATION PARAMETERS BLOCK
 
     % Coregister bet for mean PET vol thresholded
-    defaults.mniBaseDir='T1_2_MNI';
+    defaults.mniBaseDir='T1_2_MNI/';
     defaults.coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001.nii';
     %  Subject BET -f values for T1 scan
     defaults.t1Bet = [0, 0.4, 0.5];

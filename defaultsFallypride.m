@@ -45,10 +45,11 @@ function [ defaults ]=defaultsFallypride()
     %% COREGISTRATION PARAMETERS BLOCK
 
     % Coregister bet for mean PET vol thresholded
-    defaults.mniBaseDir='T1_2_MNI';
+    defaults.mniBaseDir='T1_2_MNI/';
     defaults.coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001.nii';
     %  Subject BET -f values for T1 scan
-    defaults.t1Bet = [0, 0.4, 0.5];
+    %defaults.t1Bet = [0, 0.4, 0.5];
+    defaults.t1Bet = [0];
     % Subject Brain ROIs in T1 Space
     defaults.brainT1Rois = {
         'cerebellum_T1space.nii.gz'
