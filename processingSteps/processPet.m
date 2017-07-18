@@ -30,6 +30,13 @@ function processPet()
   params=parseArgs(params,defaults);
   subjectParams={numel(subjects)};
   subjectErrors={numel(subjects)};
+  st = dbstack;
+  callerName = st(2).name;
+  if isempty(subjects)
+      s =sprintf('ERROR: Check the data dirctory configuration parameter: rootDataDir or defaults.dataDir in file %s***',callerName);
+      error(sprintf('**** %s\n**** ERROR: In configuring Data directory. There are no subjects to run analysis.',s));
+  end
+  
   for subInd=1:numel(subjects)
       subject=subjects{subInd};
       disp(['Validating files for Subject: ' subject])
@@ -151,8 +158,8 @@ end
 %%
 function [ paramOpts, subjectErr ] = validate(paramOpts)
   subject=paramOpts.subject;
-  paramOpts.subjectDataDir=[paramOpts.dataDir subject filesep paramOpts.pmodAnalysisDir filesep];  
-  paramOpts.subjectMniDir=[paramOpts.mriDataDir subject filesep paramOpts.mniBaseDir filesep];
+  paramOpts.subjectDataDir=[paramOpts.dataDir subject filesep paramOpts.pmodAnalysisDir];  
+  paramOpts.subjectMniDir=[paramOpts.mriDataDir subject filesep paramOpts.mniBaseDir];
   
   % Subject PET / T1 / ROI files
   paramOpts.pmodNiiFile = strcat(paramOpts.subjectDataDir, subject, paramOpts.pmodNiiFileExt);

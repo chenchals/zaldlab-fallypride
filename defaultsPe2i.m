@@ -43,7 +43,7 @@ function [ defaults ]=defaultsPe2i()
     %% COREGISTRATION PARAMETERS BLOCK
 
     % Coregister bet for mean PET vol thresholded
-    defaults.mniBaseDir='T1_2_MNI';
+    defaults.mniBaseDir='T1_2_MNI/';
     defaults.coWipT1Sense = 'coWIPT1W3DTFESENSEs002a001.nii';
     %  Subject BET -f values for T1 scan
     defaults.t1Bet = [0, 0.4, 0.5];
@@ -55,6 +55,7 @@ function [ defaults ]=defaultsPe2i()
     % Thresholds for the ROIs in PET space
     defaults.roiThresholds = [0.99 1];
     %  Subject BET -f values for PET scans
+    defaults.meanPetVolThreshold = 1;
     defaults.petBet = [0, 0.3,0.4,0.5,0.6];
 
 end

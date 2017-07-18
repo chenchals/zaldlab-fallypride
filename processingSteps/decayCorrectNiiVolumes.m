@@ -29,7 +29,6 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
 %  Copyright 2017
 %  Zald Lab, Department of Psychology, Vanderbilt University.
 %
- 
   batchFunction='decayCorrectNiiVolumes';
   % Set fsloutputtype to NIFTI
   setenv('FSLOUTPUTTYPE','NIFTI');
@@ -78,7 +77,7 @@ function [ decayCorrectedFileList, decayCorrectionFactors ] = decayCorrectNiiVol
           startEndAcqTimeIndex = regexp(dcList{1},'(\d{1,})$','tokens');
           startEndAcqTimeIndex = str2double(char(startEndAcqTimeIndex{1})) + 1;%29 for DY2
           dcList = strcat(subjectAnalysisDir, dcList,'.nii');
-          decayCorrectionFactors(dc) = getPetDecayCorrectionFactor(decayConstant,acqTimes(startEndAcqTimeIndex,:));
+          decayCorrectionFactors(dc) = vpa(getPetDecayCorrectionFactor(decayConstant,acqTimes(startEndAcqTimeIndex,:)));
           [multiplyCmds, dcFiles ] = multiplyNii(dcList, decayCorrectionFactors(dc), decayCorrectionFileSuffix);
           for ii=1:numel(multiplyCmds)
               cmdStr = multiplyCmds{ii};
@@ -100,7 +99,8 @@ function [multiplyCmds, oFiles ] = multiplyNii(niiFileList, factor, fileSuffix)
         currFile = niiFileList{ii};
         [pathS,name,ext] = fileparts(currFile);
         oFile = [pathS filesep name fileSuffix ext];
-        multiplyCmds{ii} =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor) ' ' oFile ];
+        %IEEE 754 double-precision
+        multiplyCmds{ii} =  ['fslmaths -dt float ' currFile ' -mul ' num2str(factor,17) ' ' oFile ];
         oFiles{ii} = oFile;
     end
 end

@@ -70,6 +70,9 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol, acquisitionTimesLi
   
   for ii=1:numel(motionCorrectionVolSetsToExclude)
       logger.info(sprintf('Motion correction: Analysis Set %d',ii-1));
+      
+      realignedDir=[subjectAnalysisDir, realignBaseDir, num2str(ii-1), filesep];
+      mkdir(realignedDir);
 
       volsToExclude = motionCorrectionVolSetsToExclude{ii};
       logger.info(sprintf('Motion correction: Excluding volumes [ %s ]',join(volsToExclude,' ')));
@@ -85,6 +88,16 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol, acquisitionTimesLi
       realignList = [realignList(refIndex) realignList];
       realignList(refIndex+1) = [];
       
+      % copy the realignList to realignDir
+      logger.info(sprintf('Motion correction: Copying input vols to realigned dir %s', realignedDir));
+      for jj = 1: numel(realignList)
+          cmd = ['cp ' char(realignList(jj)) ' ' realignedDir '.'];
+          logger.info(cmd);
+          system(cmd,'-echo');
+      end     
+      [fp, ~, ~] = fileparts(char(realignList{1}));
+      realignList = regexprep(realignList, [fp '/'],realignedDir);
+            
       % Run current job function, passing along subject-specific inputs
       logger.info(sprintf('Motion correction: Create SPM batch job'));
       batchJob{1} = createJob(realignList);
@@ -97,16 +110,13 @@ function [ motionCorrectionFileLists, meanMotionCorrectedVol, acquisitionTimesLi
       outName = strcat(subjectAnalysisDir,subject,'_',batchFunction,'_set_',num2str(ii-1));
       save(outName, 'batchJob');
       save([outName,'_jobOutput'], 'jobOutput');
-      % Copy / rename files and move to appropriate sub-directory
-      realignedDir=[subjectAnalysisDir, realignBaseDir, num2str(ii-1), filesep];
-      logger.info(sprintf('Motion correction: Copying SPM batch job output to anslysisDir %s', realignedDir));
-      mkdir(realignedDir);
-      copyfile([subjectAnalysisDir,'r*.*'], [realignedDir,'.']);
-      delete([subjectAnalysisDir,'r*.*']);
-      copyfile([subjectAnalysisDir,'mean*.*'], [realignedDir, '.']);
-      delete([subjectAnalysisDir,'mean*.*']);
-      copyfile([subjectAnalysisDir,'*_set_*.*'], [realignedDir, '.']);
-      delete([subjectAnalysisDir,'*_set_*.*']);
+      
+      % delete input vols for realignment
+      logger.info(sprintf('Motion correction: Deleting input vols from realigned dir %s', realignedDir));
+      cmdStr = ['rm ' realignedDir '/vol*.nii'];
+      logger.info(cmdStr);
+      system(cmdStr,'-echo');
+
       % Output
       motionCorrectionFileLists{ii} = realignList;
       meanMotionCorrectedVol{ii} = strcat(realignedDir,'mean',motionCorrectionRefVol,'.nii');

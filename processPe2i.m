@@ -22,17 +22,17 @@
 % default parameters
 default_params=@defaultsPe2i;
 % Change Default parameters globally for this run
-rootDataDir = '/mnt/teba/';
-rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-1/';
+rootDataDir = '/Volumes/zaldlab';
+rootAnalysisDir = '/Volumes/zaldlab2016/Chenchal/May-02-1/';
 % Directory name prefix for each subject: DND005, DND017, etc
 subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/PE2I/'];
 defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/'];
-defaults.analysisDir = [rootAnalysisDir 'PE2I'];
+defaults.analysisDir = [rootAnalysisDir 'PE2I/'];
 defaults.realignBaseDir = 'analysis-set';
 
 % Subject's PMOD analysis dir
-defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+defaults.pmodAnalysisDir = 'Decay/PMOD_Processed/';
 % PMOD nii file [defaults.subject]_PE2I_all_dy.nii
 defaults.pmodNiiFileExt = '_PE2I_all_dy.nii';
 % PMOD acq times file [defaults.subject]_PE2I.acqtimes

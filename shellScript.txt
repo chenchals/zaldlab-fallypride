@@ -2,6 +2,9 @@
 # Check: teba* is mounted at /mnt/teba, /mnt/teba2014, /mnt/teba2016
 # Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/default*
 # Check: /mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis/process*
+# To run this batch from bash command line:
+# 1. Uncomment the relevant lines
+# 2. >bash /path/to/file/shellScript.txt
 
 # For Fallypride Scan-1
 /usr/local/bin/matlab -nodisplay -r "addpath(genpath('/mnt/teba/Active_Lab_Projects/AnalysisPipeline/PetAnalysis'));processFallypride1;exit;"

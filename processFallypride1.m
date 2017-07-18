@@ -21,8 +21,13 @@
 % default parameters
 default_params=@defaultsFallypride;
 % Change Default parameters globally for this run
+<<<<<<< HEAD
 rootDataDir = '/mnt/teba/';
 rootAnalysisDir = '/mnt/teba2016/Chenchal/Apr-25-2/';
+=======
+rootDataDir = '/Volumes/zaldlab/';
+rootAnalysisDir = '/Volumes/zaldlab2016/Chenchal/May-12-1/';
+>>>>>>> release/pet-batch-process-decimal-precision-V1_1
 % Directory name prefix for each subject: DND005, DND017, etc
 subjectDirNamePrefix = 'DND*';
 defaults.dataDir = [rootDataDir 'Active_Lab_Projects/DANeuromodulation/PET_Data/Scan/Fallypride/Scan_1/'];
@@ -30,7 +35,7 @@ defaults.mriDataDir =[rootDataDir 'Active_Lab_Projects/DANeuromodulation/MRI_Dat
 defaults.analysisDir = [rootAnalysisDir 'Fallypride/Scan-1/'];
 defaults.realignBaseDir = 'analysis-set';
 % Subject's PMOD analysis dir
-defaults.pmodAnalysisDir = 'Decay/PMOD_Processed';
+defaults.pmodAnalysisDir = 'Decay/PMOD_Processed/';
 % PMOD nii file [defaults.subject]_Sess1_all_dy.nii
 defaults.pmodNiiFileExt = '_Sess1_all_dy.nii';
 % PMOD acq times file [defaults.subject]_Sess1.acqtimes
@@ -43,12 +48,14 @@ allSubjects = dir([defaults.dataDir, subjectDirNamePrefix]);
 allSubjects = {allSubjects.name};
 subjects = allSubjects;
 %% Subject List
-% subjects = {
-%     'DND040' 
-%     'DND007'
-%     };
+subjects = {
+    'DND005' 
+    'DND007'
+    'DND011'
+    };
 
 %% EXCEPTIONS BLOCK to Default parameters per subject
+<<<<<<< HEAD
 % Exceptions for DND040
 DND040.mriDataDir = '/mnt/teba/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/DND040/DND040_Scan_2/T1_2_MNI';
 
@@ -75,14 +82,38 @@ DND084.coWipT1Sense = 'coWIPWIPT1W3DTFESENSEs002a001.nii';
 % DND005.pmodNiiFileExt = '_Sess1_all_dy.nii';
 % DND005.t1Bet=[0 0.6];
 % DND005.petBet=[0 0.3 0.4];
-% 
-% DND005.motionCorrectionRefVol = 'vol0017';
-% % [defaults.realignBaseDir]0 will contain analyses with all vols
-% DND005.motionCorrectionVolSetsToExclude={
-%     {'vol0000'} % Analyses outputs in [defaults.realignBaseDir]1
-%     {'vol0000' 'vol0001'} % Analyses outputs in [defaults.realignBaseDir]2
-%     {'vol0019' } % Analyses outputs in [defaults.realignBaseDir]2
+=======
+% % Exceptions for DND040 (Scan_2 not present for subject)
+% DND040.mriDataDir = '/mnt/teba/Active_Lab_Projects/DANeuromodulation/MRI_Data/DND_Scans/';
+% DND040.mniBaseDir='Scan_2/T1_2_MNI/';
+% DND040.brainT1Rois = {
+%     'cerebellum_T1space.nii'
+%     'putamen_T1space.nii'
 %     };
+% 
+% % Exceptions for DND032
+% DND032.pmodAnalysisDir = 'Decay/PMOD_Processed/Rerun_from_Beginning_4_11_17/';
+% 
+% % Exceptions for DND074
+% DND074.coWipT1Sense = 'DND074_T1.nii';
+>>>>>>> release/pet-batch-process-decimal-precision-V1_1
+% 
+% % Exceptions for DND072
+% DND072.coWipT1Sense = 'DND072_T1.nii.gz';
+% DND072.brainT1Rois = {
+%     'cerebellum_T1space.nii'
+%     'putamen_T1space.nii'
+%     };
+%     
+% % Exceptions for DND078
+% DND078.coWipT1Sense = 'DND078_T1.nii.gz';
+% 
+% % Exceptions for DND080
+% DND080.coWipT1Sense = 'DND080_T1.nii.gz';
+% 
+% % Exceptions for DND084
+% DND084.coWipT1Sense = 'coWIPWIPT1W3DTFESENSEs002a001.nii';
+
 
 %% Call for Processing
 processPet;
